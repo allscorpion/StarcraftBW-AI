@@ -155,16 +155,36 @@ public class BuildingsManager {
     
     public static void CheckBuildingProgress() {
     	for (Building building : BuildingsUnderConstruction) {
-    		if (building._builder.canBuild() && !building._isConstructing) {
+    		building.GetNewBuilderIfRequired();
+    		if (StarCraftInstance.game.isExplored(building._buildingReservedPosition)) {
     			// build failed
-    			building.RestartBuild();
+    			if (building._builder.canBuild() && !building._builder.isConstructing()) {
+    				building.RestartBuild();	
+    			}
+    		}else {
+    			// see if worker is getting closer otherwise delete building
+//    			if (building._buildingReservedPosition.getDistance(building._lastBuilderPosition) > 
+//    					building._buildingReservedPosition.getDistance(building._builder.getTilePosition())) {
+//    				building._lastBuilderPosition = building._builder.getTilePosition();
+//    			}else {
+//    				BuildingFailedConstruction(building);	
+//    			}
     		}
 		}
     }
     
     public static Building GetBuildingFromUnit(Unit unit) {
     	for (Building building : BuildingsUnderConstruction) {
-    		if (unit.getTilePosition().getDistance(building._buildingReservedPosition) == 0) {
+    		if (unit.getTilePosition().getDistance(building._buildingReservedPosition) <= Math.max(building._buildingType.tileSize().getX(), building._buildingType.tileSize().getY())) {
+    			return building;	
+    		}
+		}	
+    	return null;		
+    }
+    
+    public static Building GetBuildingFromWorker(Unit worker) {
+    	for (Building building : BuildingsUnderConstruction) {
+    		if (worker.hashCode() == building._builder.hashCode()) {
     			return building;	
     		}
 		}	
@@ -172,7 +192,6 @@ public class BuildingsManager {
     }
     
     public static void BuildingStartedConstruction(Building building) {
-    	building._isConstructing = true;
     	ResourcesManager.MineralsInReserve -= building._buildingType.mineralPrice();
 		RemoveBuildingReservedPosition(building);
     }
@@ -188,7 +207,14 @@ public class BuildingsManager {
     
     public static void BuildingFinishedConstruction(Building building) {
     	building._builder.stop();
+    	WorkersManager.Workers.add(building._builder);
 		BuildingsUnderConstruction.remove(building);
+    }
+    
+    public static void BuildingFailedConstruction(Building building) {
+    	BuildingStartedConstruction(building);
+    	ResourcesManager.PotentialSupply -= building._buildingType.supplyProvided();
+    	BuildingFinishedConstruction(building);
     }
     
 	public static BaseLocation GetClosestEmptyBase(Unit unit) {
@@ -206,7 +232,7 @@ public class BuildingsManager {
         			break;
         		}
         	}
-			if (!baseLocationsTaken.contains(baseLocation.getPosition()) && !isInaccessible && mySpawn.getRegion().isReachable(baseLocation.getRegion()) && !baseLocation.isIsland()) 
+			if (!baseLocationsTaken.contains(baseLocation.getPosition()) && !isTileReserved(baseLocation.getTilePosition(), UnitType.Terran_Command_Center) && !isInaccessible && mySpawn.getRegion().isReachable(baseLocation.getRegion()) && !baseLocation.isIsland()) 
 			{
 				if (closestBase == null) {
 					closestBase = baseLocation;

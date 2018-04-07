@@ -34,7 +34,7 @@ public class start extends DefaultBWListener {
     @Override
     public void onStart() {
     	StarCraftInstance.Start(mirror);
-        StarCraftInstance.game.setLocalSpeed(5);
+        StarCraftInstance.game.setLocalSpeed(15);
         //Use BWTA to analyze map
         //This may take a few minutes if the map is processed first time!
         //System.out.println("Analyzing map...");
@@ -44,7 +44,9 @@ public class start extends DefaultBWListener {
         //int i = 0;
         
         // reveal entire map
-//        game.sendText("black sheep wall");
+//      StarCraftInstance.game.sendText("black sheep wall");
+        // 10,000 Minerals and Gas
+        //StarCraftInstance.game.sendText("show me the money");
         
         BaseLocation mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
         for(BaseLocation baseLocation : BWTA.getBaseLocations()){
@@ -121,7 +123,11 @@ public class start extends DefaultBWListener {
     	DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
     	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
-    		DrawingHelper.drawTextOnUnit(b._builder, "Is building " + b._buildingType + " at " + b._buildingReservedPosition);
+			DrawingHelper.drawTextOnUnit(b._builder, "Is building " + b._buildingType + " at " + b._buildingReservedPosition);
+    		StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition + "\n"));
+    		debugDetails.append(String.valueOf(b._builder.canBuild()) + "\n");
+    		debugDetails.append(String.valueOf(b._builder.isConstructing()) + "\n");
+    		DrawingHelper.drawTextAt(b._buildingReservedPosition.toPosition(), debugDetails.toString());	
     	}
     	
     	UnitsManager.attackUnits();
@@ -162,24 +168,26 @@ public class start extends DefaultBWListener {
 
     		Unit worker = WorkersManager.GetWorker();
         	//construct military buildings
-    		if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BuildingsManager.CommandCenters.size() < 4) {
-				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker);
-				if (bl != null) {
-					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
-					worker = null;
-				}
-			}
-    		if (worker == null) {
-    			worker = WorkersManager.GetWorker();	
+    		if (worker != null) {
+    			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BuildingsManager.CommandCenters.size() < 4) {
+    				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker);
+    				if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
+    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
+    					worker = null;
+    				}
+    			}
+        		if (worker == null) {
+        			worker = WorkersManager.GetWorker();	
+        		}
+    			if (BuildingsManager.CommandCenters.size() > 1) {
+    				// build a barracks if we can afford it
+    				if (ResourcesManager.getCurrentMineralsIncludingMilitary() >= UnitType.Terran_Barracks.mineralPrice() && BuildingsManager.BarracksCount < BuildingsManager.CommandCenters.size() * 2.5) {
+    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Barracks));
+    					BuildingsManager.BarracksCount++;
+    					ResourcesManager.MilitaryMineralUnitCost += 50;
+    				}						
+    			}	
     		}
-			if (BuildingsManager.CommandCenters.size() > 1) {
-				// build a barracks if we can afford it
-				if (ResourcesManager.getCurrentMineralsIncludingMilitary() >= UnitType.Terran_Barracks.mineralPrice() && BuildingsManager.BarracksCount < BuildingsManager.CommandCenters.size() * 2.5) {
-					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Barracks));
-					BuildingsManager.BarracksCount++;
-					ResourcesManager.MilitaryMineralUnitCost += 50;
-				}						
-			}
     		
     	}
     	 
