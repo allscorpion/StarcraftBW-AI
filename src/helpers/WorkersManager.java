@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import bwapi.*;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import models.Building;
 
 public class WorkersManager {
 	
@@ -26,6 +27,8 @@ public class WorkersManager {
     public static void onWorkerDestroy(Unit unit) {
     	if (unit.getType() == UnitType.Terran_SCV) {
     		Workers.remove(unit);
+    		Building workerBuilding = BuildingsManager.GetBuildingFromWorker(unit);
+    		workerBuilding._builder = null;
     	}
     }
    
