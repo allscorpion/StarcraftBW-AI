@@ -1,5 +1,6 @@
 package helpers;
 
+import bwapi.Position;
 import bwapi.Unit;
 
 public class DrawingHelper {
@@ -18,5 +19,21 @@ public class DrawingHelper {
     public static void drawTextOnScreen(String text) {
     	StarCraftInstance.game.drawTextScreen(xTextPos, yTextPos, text);
     	yTextPos += 20;
+    }
+    
+    public static void drawTextAt(int x, int y, int text) {
+    	drawTextAt(x, y, String.valueOf(text));
+    }
+    
+    public static void drawTextAt(Position p, int text) {
+    	drawTextAt(p.getX(), p.getY(), String.valueOf(text));
+    }
+    
+    public static void drawTextAt(Position p, String text) {
+    	drawTextAt(p.getX(), p.getY(), text);
+    }
+    
+    public static void drawTextAt(int x, int y, String text) {
+    	StarCraftInstance.game.drawTextMap(x, y, text);
     }
 }
