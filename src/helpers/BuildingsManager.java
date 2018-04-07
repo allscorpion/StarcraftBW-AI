@@ -22,22 +22,22 @@ import models.Building;
 
 public class BuildingsManager {
 
-	public BuildingsManager(Game _game, Player _self, ResourcesManager rm) {
-        game = _game;
-        self = _self;
-        resourcesManager = rm;
-    }
+	// Resources to build structure
+	// Tile to build structure
+	// Move to tile if unexplored
+	// Build on tile if explored
+	// Check if building is constructing
+	// Check if worker is alive and constructing building
+	// Get new worker if old worker is dead
+	// Continue constructing building
 	
-    private Game game;
-    private Player self;
-    private ResourcesManager resourcesManager;
-    public HashSet<TilePosition> ReservedTiles = new HashSet<TilePosition>();
-    public List<Building> BuildingsUnderConstruction = new ArrayList<Building>();
-    public List<Unit> CommandCenters = new ArrayList<Unit>();
-    public List<Unit> MilitaryBuildings = new ArrayList<Unit>();
-    public List<Chokepoint> InaccessibleChokepoints = new ArrayList<Chokepoint>();
-    public int BaracksCount = 0;
-    public void buildingCreated(Unit unit) {
+    public static HashSet<TilePosition> ReservedTiles = new HashSet<TilePosition>();
+    public static List<Building> BuildingsUnderConstruction = new ArrayList<Building>();
+    public static List<Unit> CommandCenters = new ArrayList<Unit>();
+    public static List<Unit> MilitaryBuildings = new ArrayList<Unit>();
+    public static List<Chokepoint> InaccessibleChokepoints = new ArrayList<Chokepoint>();
+    public static int BarracksCount = 0;
+    public static void buildingCreated(Unit unit) {
     	if (unit.getType().isBuilding()) {
     		if (unit.getType() == UnitType.Terran_Supply_Depot) {
     			//game.printf("Created depo at " + (self.supplyUsed() / 2) + " Supply");	
@@ -51,7 +51,7 @@ public class BuildingsManager {
     		if (BuildingsUnderConstruction.size() > 0) {
     			Building constructingBuidling = GetBuildingFromUnit(unit);
         		if (constructingBuidling == null) {
-        			game.printf("Unable to find building");
+        			StarCraftInstance.game.printf("Unable to find building");
         		}else {
         			constructingBuidling._structure = unit;
         			BuildingStartedConstruction(constructingBuidling);
@@ -60,24 +60,25 @@ public class BuildingsManager {
     	}
     }
 
-    public void buildingDestroyed(Unit unit) {
+    public static void buildingDestroyed(Unit unit) {
     	if (unit.getType().isBuilding()) {
     		if (unit.getType() == UnitType.Terran_Command_Center) {
         		CommandCenters.remove(unit);
         	}
         	else if (unit.getType() == UnitType.Terran_Barracks) {
         		MilitaryBuildings.remove(unit);
-        		BaracksCount--;
+        		ResourcesManager.MilitaryMineralUnitCost -= 50;
+        		BarracksCount--;
     		}
     	}
     }
     
-    public void buildingComplete(Unit unit) {
+    public static void buildingComplete(Unit unit) {
     	if (unit.getType().isBuilding()) {
     		if (BuildingsUnderConstruction.size() > 0) {
     			Building finishedBuilding = GetBuildingFromUnit(unit);
         		if (finishedBuilding == null) {
-        			game.printf("Unable to find building");
+        			StarCraftInstance.game.printf("Unable to find building");
         		}else {
         			BuildingFinishedConstruction(finishedBuilding);
         		}	
@@ -87,14 +88,14 @@ public class BuildingsManager {
     
  // Returns a suitable TilePosition to build a given building type near
  // specified TilePosition aroundTile, or null if not found. (builder parameter is our worker)
-    public TilePosition getBuildTile(Unit builder, UnitType buildingType, TilePosition aroundTile) {
+    public static TilePosition getBuildTile(Unit builder, UnitType buildingType, TilePosition aroundTile) {
 	 	TilePosition ret = null;
 	 	int maxDist = 3;
 	 	int stopDist = 40;
 	
 	 	// Refinery, Assimilator, Extractor
 	 	if (buildingType.isRefinery()) {
-	 		for (Unit n : game.neutral().getUnits()) {
+	 		for (Unit n : StarCraftInstance.game.neutral().getUnits()) {
 	 			if ((n.getType() == UnitType.Resource_Vespene_Geyser) &&
 	 					( Math.abs(n.getTilePosition().getX() - aroundTile.getX()) < stopDist ) &&
 	 					( Math.abs(n.getTilePosition().getY() - aroundTile.getY()) < stopDist )
@@ -106,10 +107,10 @@ public class BuildingsManager {
 	 		for (int i=aroundTile.getX()-maxDist; i<=aroundTile.getX()+maxDist; i++) {
 	 			for (int j=aroundTile.getY()-maxDist; j<=aroundTile.getY()+maxDist; j++) {
 	 				TilePosition availablePosition = new TilePosition(i, j);
-	 				if (!isTileReserved(availablePosition, buildingType) && game.canBuildHere(availablePosition, buildingType, builder, false)) {
+	 				if (!isTileReserved(availablePosition, buildingType) && StarCraftInstance.game.canBuildHere(availablePosition, buildingType, builder, false)) {
 	 					// units that are blocking the tile
 	 					boolean unitsInWay = false;
-	 					for (Unit u : game.getAllUnits()) {
+	 					for (Unit u : StarCraftInstance.game.getAllUnits()) {
 	 						if (u.getID() == builder.getID()) continue;
 	 						if ((Math.abs(u.getTilePosition().getX()-i) < 4) && (Math.abs(u.getTilePosition().getY()-j) < 4)) unitsInWay = true;
 	 					}
@@ -136,12 +137,12 @@ public class BuildingsManager {
 	
 	 	if (ret == null) {
 	 		// refund building 
-	 		game.printf("Unable to find suitable build position for "+ buildingType.toString());	
+	 		StarCraftInstance.game.printf("Unable to find suitable build position for "+ buildingType.toString());	
 	 	};
 	 	return ret;
 	 }
     
-    public boolean isTileReserved(TilePosition position, UnitType buildingType) {
+    public static boolean isTileReserved(TilePosition position, UnitType buildingType) {
     	boolean isReserved = false;
     	for (TilePosition reservedPosition : ReservedTiles) {
     		if (reservedPosition.getDistance(position) <= Math.max(buildingType.tileSize().getX(), buildingType.tileSize().getY())) {
@@ -152,7 +153,7 @@ public class BuildingsManager {
     	return isReserved;
     }
     
-    public void CheckBuildingProgress() {
+    public static void CheckBuildingProgress() {
     	for (Building building : BuildingsUnderConstruction) {
     		if (building._builder.canBuild() && !building._isConstructing) {
     			// build failed
@@ -161,7 +162,7 @@ public class BuildingsManager {
 		}
     }
     
-    public Building GetBuildingFromUnit(Unit unit) {
+    public static Building GetBuildingFromUnit(Unit unit) {
     	for (Building building : BuildingsUnderConstruction) {
     		if (unit.getTilePosition().getDistance(building._buildingReservedPosition) == 0) {
     			return building;	
@@ -170,13 +171,13 @@ public class BuildingsManager {
     	return null;		
     }
     
-    public void BuildingStartedConstruction(Building building) {
+    public static void BuildingStartedConstruction(Building building) {
     	building._isConstructing = true;
-    	resourcesManager.MineralsInReserve -= building._buildingType.mineralPrice();
+    	ResourcesManager.MineralsInReserve -= building._buildingType.mineralPrice();
 		RemoveBuildingReservedPosition(building);
     }
     
-    public void RemoveBuildingReservedPosition(Building building) {
+    public static void RemoveBuildingReservedPosition(Building building) {
     	for (TilePosition position : ReservedTiles) {
 			if (position.getDistance(building._buildingReservedPosition) == 0)  {
 				ReservedTiles.remove(position);
@@ -185,12 +186,13 @@ public class BuildingsManager {
 		}
     }
     
-    public void BuildingFinishedConstruction(Building building) {
+    public static void BuildingFinishedConstruction(Building building) {
+    	building._builder.stop();
 		BuildingsUnderConstruction.remove(building);
     }
     
-	public BaseLocation GetClosestEmptyBase(Unit unit) {
-    	BaseLocation mySpawn = BWTA.getStartLocation(self);
+	public static BaseLocation GetClosestEmptyBase(Unit unit) {
+    	BaseLocation mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
         BaseLocation closestBase = null;
         List<Position> baseLocationsTaken = new ArrayList<Position>();
         for (Unit commandCenter : CommandCenters) {
@@ -199,7 +201,6 @@ public class BuildingsManager {
         for (final BaseLocation baseLocation : BWTA.getBaseLocations()) {
         	boolean isInaccessible = false;
         	for (Chokepoint cp : baseLocation.getRegion().getChokepoints()) {
-        		game.drawTextMap(cp.getCenter(), "Belongs to " + baseLocation.hashCode());
         		if (InaccessibleChokepoints.contains(cp)) {
         			isInaccessible = true;
         			break;
@@ -215,11 +216,11 @@ public class BuildingsManager {
 				}
 			}
 		}
-        game.drawTextMap(closestBase.getPosition(), "My next base");
+        //game.drawTextMap(closestBase.getPosition(), "My next base");
         return closestBase;
     }
 	
-	public Chokepoint GetClosestChokepoint(final BaseLocation baseLocation) {
+	public static Chokepoint GetClosestChokepoint(final BaseLocation baseLocation) {
 		List<Chokepoint> baseChokepoints = baseLocation.getRegion().getChokepoints();
 		Collections.sort(baseChokepoints, new Comparator<Chokepoint>() {
             @Override
@@ -228,7 +229,6 @@ public class BuildingsManager {
                         ? -1 : 1;
             }
         });
-		game.drawTextMap(baseChokepoints.get(0).getCenter(), "Closest CP");
 		return baseChokepoints.get(0);
 	}
 	

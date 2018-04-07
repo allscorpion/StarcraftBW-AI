@@ -6,42 +6,40 @@ import helpers.ResourcesManager;
 
 
 public class Building {
-	public Building(Game _game, Player _self, BuildingsManager bm, ResourcesManager rm, Unit builder, UnitType buildingType) {
-		Init(_game, _self, bm, rm, builder, buildingType, null);
+	public Building(Unit builder, UnitType buildingType) {
+		Init(builder, buildingType, null);
 		
 	}
-	public Building(Game _game, Player _self, BuildingsManager bm, ResourcesManager rm, 
-			Unit builder, UnitType buildingType, TilePosition position) {
-		Init(_game, _self, bm, rm, builder, buildingType, position);
+	public Building(Unit builder, UnitType buildingType, TilePosition position) {
+		Init(builder, buildingType, position);
 	}
-	public BuildingsManager _buildingsManager;
-	public ResourcesManager _resourcesManager;
 	public Unit _builder;
 	public Unit _structure;
 	public UnitType _buildingType;
 	public TilePosition _buildingReservedPosition;
 	public boolean _isConstructing;
 	public boolean _isBuilderMoving;
-	
-	public void Init(Game _game, Player _self, BuildingsManager bm, ResourcesManager rm, 
-			Unit builder, UnitType buildingType, TilePosition position) {
-		_buildingsManager = bm;
-		_resourcesManager = rm;
+	public boolean _isPositionOverriden;
+	public void Init(Unit builder, UnitType buildingType, TilePosition position) {
 		_builder = builder;
 		_buildingType = buildingType;
 		_isConstructing = false;
 		_isBuilderMoving = false;
-		_resourcesManager.PotentialSupply += _buildingType.supplyProvided();
-		_resourcesManager.MineralsInReserve += _buildingType.mineralPrice();
+		ResourcesManager.PotentialSupply += _buildingType.supplyProvided();
+		ResourcesManager.MineralsInReserve += _buildingType.mineralPrice();
 		if (position == null) {
+			_isPositionOverriden = false;
 			SetBuildingPosition();			
 		}else {
+			_isPositionOverriden = true;
 			SetBuildingPosition(position);
 		}
 		ConstructBuilding();
 	}
 	public void GetNewBuilder() {
 		if (_builder == null) {
+			// temporary code fix later
+			BuildingsManager.BuildingFinishedConstruction(this);
 			// get new worker
 			//game.printf("Unable to find worker for " + _buildingType);
 //			for (Unit worker : Workers) {
@@ -52,10 +50,10 @@ public class Building {
 		}
 	}
 	public void SetBuildingPosition() {
-		SetBuildingPosition(_buildingsManager.getBuildTile(_builder, _buildingType, _builder.getTilePosition()));
+		SetBuildingPosition(BuildingsManager.getBuildTile(_builder, _buildingType, _builder.getTilePosition()));
 	}
 	public void SetBuildingPosition(TilePosition position) {
-		_buildingsManager.ReservedTiles.add(position);
+		BuildingsManager.ReservedTiles.add(position);
 		_buildingReservedPosition = position;	
 	}
 	
@@ -66,11 +64,15 @@ public class Building {
 		if (_structure != null) {
 			_builder.repair(_structure);
 		}else {
-			if (!_isBuilderMoving) {
-				_buildingsManager.RemoveBuildingReservedPosition(this);
+			if (!_isBuilderMoving && !_isPositionOverriden) {
+				BuildingsManager.RemoveBuildingReservedPosition(this);
     			SetBuildingPosition();	
     		}
-			ConstructBuilding();
+			if (!_isBuilderMoving && _isPositionOverriden) {
+				BuildingsManager.BuildingFinishedConstruction(this);
+    		} else {
+    			ConstructBuilding();	
+    		}
 		}
 	}
 	public void ConstructBuilding() {
