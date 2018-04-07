@@ -3,6 +3,7 @@ package models;
 import bwapi.*;
 import helpers.BuildingsManager;
 import helpers.ResourcesManager;
+import helpers.WorkersManager;
 
 
 public class Building {
@@ -14,16 +15,17 @@ public class Building {
 		Init(builder, buildingType, position);
 	}
 	public Unit _builder;
+	public TilePosition _lastBuilderPosition;
 	public Unit _structure;
 	public UnitType _buildingType;
 	public TilePosition _buildingReservedPosition;
-	public boolean _isConstructing;
 	public boolean _isBuilderMoving;
 	public boolean _isPositionOverriden;
 	public void Init(Unit builder, UnitType buildingType, TilePosition position) {
+		WorkersManager.Workers.remove(builder);
 		_builder = builder;
+		_lastBuilderPosition = builder.getTilePosition();
 		_buildingType = buildingType;
-		_isConstructing = false;
 		_isBuilderMoving = false;
 		ResourcesManager.PotentialSupply += _buildingType.supplyProvided();
 		ResourcesManager.MineralsInReserve += _buildingType.mineralPrice();
@@ -36,17 +38,11 @@ public class Building {
 		}
 		ConstructBuilding();
 	}
-	public void GetNewBuilder() {
+	public void GetNewBuilderIfRequired() {
 		if (_builder == null) {
-			// temporary code fix later
-			BuildingsManager.BuildingFinishedConstruction(this);
 			// get new worker
 			//game.printf("Unable to find worker for " + _buildingType);
-//			for (Unit worker : Workers) {
-//				if (worker.canBuild()) {
-//					_builder = worker;
-//				}
-//			}
+			_builder = WorkersManager.GetWorker();
 		}
 	}
 	public void SetBuildingPosition() {
@@ -60,9 +56,9 @@ public class Building {
 	
 	
 	public void RestartBuild() {
-		GetNewBuilder();
+		GetNewBuilderIfRequired();
 		if (_structure != null) {
-			_builder.repair(_structure);
+			_builder.rightClick(_structure);
 		}else {
 			if (!_isBuilderMoving && !_isPositionOverriden) {
 				BuildingsManager.RemoveBuildingReservedPosition(this);
