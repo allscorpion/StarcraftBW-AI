@@ -7,26 +7,24 @@ import helpers.WorkersManager;
 
 
 public class Building {
-	public Building(Unit builder, UnitType buildingType) {
+	public Building(Worker builder, UnitType buildingType) {
 		Init(builder, buildingType, null);
 		
 	}
-	public Building(Unit builder, UnitType buildingType, TilePosition position) {
+	public Building(Worker builder, UnitType buildingType, TilePosition position) {
 		Init(builder, buildingType, position);
 	}
-	public Unit _builder;
+	public Worker _builder;
 	public TilePosition _lastBuilderPosition;
 	public Unit _structure;
 	public UnitType _buildingType;
 	public TilePosition _buildingReservedPosition;
 	public boolean _isBuilderMoving;
 	public boolean _isPositionOverriden;
-	public void Init(Unit builder, UnitType buildingType, TilePosition position) {
-		// remove from workers so that the builder doesn't get selected again
-		WorkersManager.Workers.remove(builder);
-		WorkersManager.Builders.add(builder);
-		_builder = builder;
-		_lastBuilderPosition = builder.getTilePosition();
+	public void Init(Worker w, UnitType buildingType, TilePosition position) {
+    	w.isBuilding = true;
+		_builder = w;
+		_lastBuilderPosition = w.unit.getTilePosition();
 		_buildingType = buildingType;
 		_isBuilderMoving = false;
 		if (_buildingType == UnitType.Terran_Supply_Depot) {
@@ -53,7 +51,7 @@ public class Building {
 		}
 	}
 	public void SetBuildingPosition() {
-		SetBuildingPosition(BuildingsManager.getBuildTile(_builder, _buildingType, _builder.getTilePosition()));
+		SetBuildingPosition(BuildingsManager.getBuildTile(_builder.unit, _buildingType, _builder.unit.getTilePosition()));
 	}
 	public void SetBuildingPosition(TilePosition position) {
 		BuildingsManager.ReservedTiles.add(position);
@@ -65,7 +63,7 @@ public class Building {
 	public void RestartBuild() {
 		GetNewBuilderIfRequired();
 		if (_structure != null) {
-			_builder.rightClick(_structure);
+			_builder.unit.rightClick(_structure);
 		}else {
 			ConstructBuilding();
 //			if (!_isBuilderMoving && !_isPositionOverriden) {
@@ -81,13 +79,13 @@ public class Building {
 	}
 	public void ConstructBuilding() {
 		if (_buildingReservedPosition != null) {
-			if (_builder.canBuild(_buildingType, _buildingReservedPosition)) {
-    			if (_builder.build(_buildingType, _buildingReservedPosition)) {
+			if (_builder.unit.canBuild(_buildingType, _buildingReservedPosition)) {
+    			if (_builder.unit.build(_buildingType, _buildingReservedPosition)) {
     				_isBuilderMoving = false;		
     			}
-			}else if (!_isBuilderMoving){
-				_isBuilderMoving = true;
-				_builder.move(_buildingReservedPosition.toPosition());
+			}else {
+				_isBuilderMoving = true;	
+				_builder.unit.move(_buildingReservedPosition.toPosition());
 			}
 		}
 	}

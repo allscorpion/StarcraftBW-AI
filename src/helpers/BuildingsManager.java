@@ -18,6 +18,7 @@ import bwta.BaseLocation;
 import bwta.Chokepoint;
 import helpers.ResourcesManager;
 import models.Building;
+import models.Worker;
 
 
 public class BuildingsManager {
@@ -170,7 +171,7 @@ public class BuildingsManager {
     		building.GetNewBuilderIfRequired();
     		if (StarCraftInstance.game.isExplored(building._buildingReservedPosition)) {
     			// build failed
-    			if (building._builder.canBuild() && !building._builder.isConstructing()) {
+    			if (building._builder.unit.canBuild() && !building._builder.unit.isConstructing()) {
     				building.RestartBuild();	
     			}
     		}else {
@@ -199,7 +200,7 @@ public class BuildingsManager {
     public static Building GetBuildingFromWorker(Unit worker) {
     	for (Building building : BuildingsUnderConstruction) {
     		if (building._builder != null) {
-    			if (worker.getID() == building._builder.getID()) {
+    			if (worker.getID() == building._builder.unit.getID()) {
         			return building;	
         		}	
     		}
@@ -222,9 +223,8 @@ public class BuildingsManager {
     }
     
     public static void BuildingFinishedConstruction(Building building) {
-    	building._builder.stop();
-    	WorkersManager.Workers.add(building._builder);
-    	WorkersManager.Builders.remove(building._builder);
+    	building._builder.unit.stop();
+    	building._builder.isBuilding = false;
     	if (building._buildingType == UnitType.Terran_Command_Center) {
 			ResourcesManager.PotentialSupply += building._buildingType.supplyProvided();	
 			// split workers between bases

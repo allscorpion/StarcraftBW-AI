@@ -15,12 +15,15 @@ import bwta.Chokepoint;
 import helpers.StarCraftInstance;
 import helpers.BuildingsManager;
 import helpers.DrawingHelper;
+import helpers.MineralsHelper;
 import helpers.ResourcesManager;
 import helpers.ProcessHelper;
 import helpers.WorkersManager;
 import helpers.UnitsManager;
 import helpers.ScoutsManager;
 import models.Building;
+import models.Mineral;
+import models.Worker;
 
 public class start extends DefaultBWListener {
 	
@@ -120,7 +123,7 @@ public class start extends DefaultBWListener {
     	DrawingHelper.resetTextPos();
         
         //game.setTextSize(10);
-//        DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
+        DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
 //        DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
         
         
@@ -129,15 +132,46 @@ public class start extends DefaultBWListener {
         // game.drawTextScreen(10, 10, "" + getCurrentMinerals());
     	DrawingHelper.drawTextOnScreen("Current Minerals " + String.valueOf(ResourcesManager.getCurrentMinerals()));
     	DrawingHelper.drawTextOnScreen("MineralsInReserve " + String.valueOf(ResourcesManager.MineralsInReserve));
-    	DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
+    	// DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
+    	for (Unit commandCenter : BuildingsManager.CommandCenters) {
+    		BaseLocation commandCenterbl = null;
+    		for (BaseLocation bl : StarCraftInstance.baseLocations) {
+    			if (bl.getPosition().getDistance(commandCenter.getPosition()) == 0) {
+    				commandCenterbl = bl;
+    				break;
+    			}
+    		}
+    		if (commandCenterbl != null) {
+    			// found base location 
+    			int totalMiningWorkers = 0;
+    			if (MineralsHelper.minerals.size() > 0) {
+    				for (Unit mineral : commandCenterbl.getMinerals()) {
+        				Mineral m = MineralsHelper.GetMineralFromUnit(mineral);
+        				if (m != null) {
+        					DrawingHelper.drawTextOnUnit(m.node, "" + m.amountOfWorkersAssignedToMineral);	
+        					totalMiningWorkers += m.amountOfWorkersAssignedToMineral;
+        				}
+        			}	
+    			}
+    			StringBuilder commandCenterText = new StringBuilder(totalMiningWorkers + "/" + (commandCenterbl.getMinerals().size() * 2) + "\n");
+    			
+    			DrawingHelper.drawTextOnUnit(commandCenter, commandCenterText.toString());
+    		}
+    	}
+    	
 //    	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
+    		if (b._buildingReservedPosition != null && b._buildingType != null) {
+    			DrawingHelper.drawTextOnScreen(b._buildingType + " is " + ((b._structure != null) ? "building" : "starting") + " at " + b._buildingReservedPosition);
+    		}
     		if (b._builder != null) {
-    			DrawingHelper.drawTextOnUnit(b._builder, "Is building " + b._buildingType + " at " + b._buildingReservedPosition);
-        		StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition + "\n"));
-        		debugDetails.append(String.valueOf(b._builder.canBuild()) + "\n");
-        		debugDetails.append(String.valueOf(b._builder.isConstructing()) + "\n");
+    			StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition + "\n"));
+    			debugDetails.append(String.valueOf(b._builder.unit.canBuild()) + "\n");
+        		debugDetails.append(String.valueOf(b._builder.unit.isConstructing()) + "\n");
         		DrawingHelper.drawTextAt(b._buildingReservedPosition.toPosition(), debugDetails.toString());	
+    			StringBuilder builderDetails = new StringBuilder("Can build " + String.valueOf(b._builder.unit.canBuild() + "\n"));
+    			builderDetails.append("Constructing " + b._builder.unit.isConstructing());
+    			DrawingHelper.drawTextOnUnit(b._builder.unit, builderDetails.toString());
     		}
     	}
     	
@@ -145,11 +179,11 @@ public class start extends DefaultBWListener {
     	
     	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
     		scoutSent = true;
-    		Unit scout = WorkersManager.GetWorker();
-    		WorkersManager.Workers.remove(scout);
-    		ScoutsManager.Scouts.add(scout);
+    		Worker w = WorkersManager.GetWorker();
+    		w.isScout = true;
+    		ScoutsManager.ScoutEnemyBase(w.unit);
     	}
-    	ScoutsManager.ScoutEnemyBase();
+    	
     	// drawTextOnScreen("Military Mineral Production Cost " + String.valueOf(MilitaryMineralUnitCost));
     	// game.drawTextScreen(10, 50, "Amount of workers: " + Workers.size());
         //StringBuilder units = new StringBuilder("My units:\n");
@@ -160,7 +194,7 @@ public class start extends DefaultBWListener {
 //    	}
     	//storeEnemyBuidlings();
     	BuildingsManager.CheckBuildingProgress();
-    	WorkersManager.SendIdleWorkersToMinerals();
+    	WorkersManager.SendIdleWorkersToMinerals(StarCraftInstance.mySpawn.getPosition());
     	BuildingsManager.storeEnemyBuidlings();
     	//DrawingHelper.drawTextOnScreen("shouldBuildDepo " + String.valueOf(ResourcesManager.isDepoRequired()));
     	//build depos
@@ -183,11 +217,11 @@ public class start extends DefaultBWListener {
                 }
     		}
 
-    		Unit worker = WorkersManager.GetWorker();
+    		Worker worker = WorkersManager.GetWorker();
         	//construct military buildings
     		if (worker != null) {
     			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BuildingsManager.CommandCenters.size() < 4) {
-    				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker);
+    				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
     				if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
     					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
     					worker = null;

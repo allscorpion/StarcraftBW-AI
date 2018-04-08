@@ -36,43 +36,56 @@ public class UnitsManager{
     
     public static void attackUnits() {
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
-    	if (closestEnemyUnits.size() > 0) {
-			for (final Unit myUnit : MilitaryUnits) {
-				if (myUnit.isIdle()) {
-//					Collections.sort(closestEnemyUnits, new Comparator<Unit>() {
-//			            @Override
-//			            public int compare(Unit u1, Unit u2) {
-//							return myUnit.getPosition().getDistance(u1.getPosition()) < myUnit.getPosition().getDistance(u2.getPosition())
-//			                        ? -1 : 1;
-//			            }
-//			        });
-					for (Unit enemyUnit : closestEnemyUnits) {
-						myUnit.attack(enemyUnit.getPosition());
-			    	}
-				}
-			}
-		} else {
-			if (StarCraftInstance.self.allUnitCount(UnitType.Terran_Marine) < 50) {
-//				for (Unit attackUnit : MilitaryUnits) {
-//					Position rallyLocation = new Position(GetClosestEmptyBase().getPosition().getX(), GetClosestEmptyBase().getPosition().getY() + 20);
-//					if (attackUnit.getPosition().getDistance(rallyLocation) > 10) {
-//						attackUnit.attack(rallyLocation);
-//					}
-//				} 
-			} else {
-	    		for (Unit myUnit : MilitaryUnits) {
-	    			if (myUnit.isIdle()) {
-	    				for (BaseLocation b : BWTA.getBaseLocations()) {
-	            			// If this is a possible start location,
-	            			if (b.isStartLocation() && b.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
-	            				// do something. For example send some unit to attack that position:
-	            				myUnit.attack(b.getPosition());
-	            			}
-	            		}	
-	    			}
-				}
-			}
-	    	
-		}
+    	if (StarCraftInstance.self.supplyUsed() / 2 == 200) {
+    		for (Unit myUnit : MilitaryUnits) {
+    			if (myUnit.isIdle()) {
+    				for (BaseLocation b : StarCraftInstance.baseLocations) {
+            			// If this is a possible start location,
+            			if (b.isStartLocation() && b.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
+            				// do something. For example send some unit to attack that position:
+            				myUnit.attack(b.getPosition());
+            			}
+            		}	
+    			}
+    		}
+    	}
+//    	if (closestEnemyUnits.size() > 0) {
+//			for (final Unit myUnit : MilitaryUnits) {
+//				if (myUnit.isIdle()) {
+////					Collections.sort(closestEnemyUnits, new Comparator<Unit>() {
+////			            @Override
+////			            public int compare(Unit u1, Unit u2) {
+////							return myUnit.getPosition().getDistance(u1.getPosition()) < myUnit.getPosition().getDistance(u2.getPosition())
+////			                        ? -1 : 1;
+////			            }
+////			        });
+//					for (Unit enemyUnit : closestEnemyUnits) {
+//						myUnit.attack(enemyUnit.getPosition());
+//			    	}
+//				}
+//			}
+//		} else {
+//			if (StarCraftInstance.self.allUnitCount(UnitType.Terran_Marine) < 50) {
+////				for (Unit attackUnit : MilitaryUnits) {
+////					Position rallyLocation = new Position(GetClosestEmptyBase().getPosition().getX(), GetClosestEmptyBase().getPosition().getY() + 20);
+////					if (attackUnit.getPosition().getDistance(rallyLocation) > 10) {
+////						attackUnit.attack(rallyLocation);
+////					}
+////				} 
+//			} else {
+//	    		for (Unit myUnit : MilitaryUnits) {
+//	    			if (myUnit.isIdle()) {
+//	    				for (BaseLocation b : StarCraftInstance.baseLocations) {
+//	            			// If this is a possible start location,
+//	            			if (b.isStartLocation() && b.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
+//	            				// do something. For example send some unit to attack that position:
+//	            				myUnit.attack(b.getPosition());
+//	            			}
+//	            		}	
+//	    			}
+//				}
+//			}
+//	    	
+//		}
     }
 }
