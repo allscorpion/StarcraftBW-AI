@@ -19,13 +19,13 @@ import helpers.ResourcesManager;
 import helpers.ProcessHelper;
 import helpers.WorkersManager;
 import helpers.UnitsManager;
+import helpers.ScoutsManager;
 import models.Building;
 
 public class start extends DefaultBWListener {
 	
-    private HashSet<Position> enemyBuildingMemory = new HashSet<Position>();
-    
     private static Mirror mirror = new Mirror();
+    private static boolean scoutSent = false;
     public void run() {
         mirror.getModule().setEventListener(this);
         mirror.startGame();
@@ -40,6 +40,7 @@ public class start extends DefaultBWListener {
         //System.out.println("Analyzing map...");
         BWTA.readMap();
         BWTA.analyze();
+        StarCraftInstance.SetBaseLocations();
         //System.out.println("Map data ready");
         //int i = 0;
         
@@ -119,13 +120,16 @@ public class start extends DefaultBWListener {
     	DrawingHelper.resetTextPos();
         
         //game.setTextSize(10);
-        DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
+//        DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
+//        DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
+        
+        
 //        drawTextOnScreen("Command Centers " + CommandCenters.size());
         //drawTextOnScreen("Military Buildings " + MilitaryBuildings.size());
         // game.drawTextScreen(10, 10, "" + getCurrentMinerals());
-//    	DrawingHelper.drawTextOnScreen("Current Minerals " + String.valueOf(ResourcesManager.getCurrentMinerals()));
-//    	DrawingHelper.drawTextOnScreen("MineralsInReserve " + String.valueOf(ResourcesManager.MineralsInReserve));
-//    	DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
+    	DrawingHelper.drawTextOnScreen("Current Minerals " + String.valueOf(ResourcesManager.getCurrentMinerals()));
+    	DrawingHelper.drawTextOnScreen("MineralsInReserve " + String.valueOf(ResourcesManager.MineralsInReserve));
+    	DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
 //    	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
     		if (b._builder != null) {
@@ -139,8 +143,13 @@ public class start extends DefaultBWListener {
     	
     	UnitsManager.attackUnits();
     	
-
-    	
+    	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
+    		scoutSent = true;
+    		Unit scout = WorkersManager.GetWorker();
+    		WorkersManager.Workers.remove(scout);
+    		ScoutsManager.Scouts.add(scout);
+    	}
+    	ScoutsManager.ScoutEnemyBase();
     	// drawTextOnScreen("Military Mineral Production Cost " + String.valueOf(MilitaryMineralUnitCost));
     	// game.drawTextScreen(10, 50, "Amount of workers: " + Workers.size());
         //StringBuilder units = new StringBuilder("My units:\n");
@@ -152,6 +161,7 @@ public class start extends DefaultBWListener {
     	//storeEnemyBuidlings();
     	BuildingsManager.CheckBuildingProgress();
     	WorkersManager.SendIdleWorkersToMinerals();
+    	BuildingsManager.storeEnemyBuidlings();
     	//DrawingHelper.drawTextOnScreen("shouldBuildDepo " + String.valueOf(ResourcesManager.isDepoRequired()));
     	//build depos
     	//BuildingsManager.GetClosestEmptyBase(null);
@@ -202,59 +212,6 @@ public class start extends DefaultBWListener {
         //draw my units on screen
         //game.drawTextScreen(10, 25, units.toString());
     }
-    
-
-    
-//    public void storeEnemyBuidlings() {
-//    	//always loop over all currently visible enemy units (even though this set is usually empty)
-//    	for (Unit u : game.enemy().getUnits()) {
-//    		//if this unit is in fact a building
-//    		if (u.getType().isBuilding()) {
-//    			//check if we have it's position in memory and add it if we don't
-//    			if (!enemyBuildingMemory.contains(u.getPosition())) enemyBuildingMemory.add(u.getPosition());
-//    		}
-//    	}
-//
-//    	//loop over all the positions that we remember
-//    	for (final Position p : enemyBuildingMemory) {
-//    		// compute the TilePosition corresponding to our remembered Position p
-//    		TilePosition tileCorrespondingToP = new TilePosition(p.getX()/32 , p.getY()/32);
-//
-//    		//if that tile is currently visible to us...
-//    		if (game.isVisible(tileCorrespondingToP)) {
-//
-//    			//loop over all the visible enemy buildings and find out if at least
-//    			//one of them is still at that remembered position
-//    			boolean buildingStillThere = false;
-//    			for (Unit u : game.enemy().getUnits()) {
-//    				if ((u.getType().isBuilding()) && (u.getPosition().equals(p))) {
-//    					buildingStillThere = true;
-//    					break;
-//    				}
-//    			}
-//
-//    			//if there is no more any building, remove that position from our memory
-//    			if (buildingStillThere == false) {
-//    				enemyBuildingMemory.remove(p);
-//    				break;
-//    			}else {
-//		    		self.getUnits().stream().filter(new Predicate<Unit>() {
-//						@Override
-//						public boolean test(Unit u) {
-//							return !u.isAttacking();
-//						}
-//					}).forEach(new Consumer<Unit>() {
-//						@Override
-//						public void accept(Unit attackUnit) {
-//							if (attackUnit.getType() == UnitType.Terran_Marine) {
-//								attackUnit.attack(p);
-//							}
-//						}
-//					});
-//    			}
-//    		}
-//    	}
-//    }
     
     private boolean isMyUnit (Unit unit) {
     	boolean isMyUnit = false;
