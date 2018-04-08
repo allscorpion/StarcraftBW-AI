@@ -17,6 +17,7 @@ import models.Building;
 public class WorkersManager {
 	
     public static List<Unit> Workers = new ArrayList<Unit>();
+    public static List<Unit> Builders = new ArrayList<Unit>();
     
     public static void onWorkerCreate(Unit unit) {
     	if (unit.getType() == UnitType.Terran_SCV) {
@@ -27,8 +28,14 @@ public class WorkersManager {
     public static void onWorkerDestroy(Unit unit) {
     	if (unit.getType() == UnitType.Terran_SCV) {
     		Workers.remove(unit);
-    		Building workerBuilding = BuildingsManager.GetBuildingFromWorker(unit);
-    		workerBuilding._builder = null;
+    		if (Builders.size() > 0 && Builders.contains(unit)) {
+    			Building workerBuilding = BuildingsManager.GetBuildingFromWorker(unit);
+        		if (workerBuilding != null) {
+        			workerBuilding._builder = null;	
+        		}else {
+        			DrawingHelper.writeTextMessage("Unable to find building from dead worker");
+        		}
+    		}
     	}
     }
    

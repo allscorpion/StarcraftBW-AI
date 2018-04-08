@@ -22,17 +22,23 @@ public class Building {
 	public boolean _isBuilderMoving;
 	public boolean _isPositionOverriden;
 	public void Init(Unit builder, UnitType buildingType, TilePosition position) {
+		// remove from workers so that the builder doesn't get selected again
 		WorkersManager.Workers.remove(builder);
+		WorkersManager.Builders.add(builder);
 		_builder = builder;
 		_lastBuilderPosition = builder.getTilePosition();
 		_buildingType = buildingType;
 		_isBuilderMoving = false;
-		ResourcesManager.PotentialSupply += _buildingType.supplyProvided();
+		if (_buildingType == UnitType.Terran_Supply_Depot) {
+			ResourcesManager.PotentialSupply += _buildingType.supplyProvided();	
+		}
 		ResourcesManager.MineralsInReserve += _buildingType.mineralPrice();
 		if (position == null) {
+			// auto position building
 			_isPositionOverriden = false;
 			SetBuildingPosition();			
 		}else {
+			// manually position building
 			_isPositionOverriden = true;
 			SetBuildingPosition(position);
 		}
@@ -43,6 +49,7 @@ public class Building {
 			// get new worker
 			//game.printf("Unable to find worker for " + _buildingType);
 			_builder = WorkersManager.GetWorker();
+			_isBuilderMoving = false;
 		}
 	}
 	public void SetBuildingPosition() {
@@ -60,15 +67,16 @@ public class Building {
 		if (_structure != null) {
 			_builder.rightClick(_structure);
 		}else {
-			if (!_isBuilderMoving && !_isPositionOverriden) {
-				BuildingsManager.RemoveBuildingReservedPosition(this);
-    			SetBuildingPosition();	
-    		}
-			if (!_isBuilderMoving && _isPositionOverriden) {
-				BuildingsManager.BuildingFinishedConstruction(this);
-    		} else {
-    			ConstructBuilding();	
-    		}
+			ConstructBuilding();
+//			if (!_isBuilderMoving && !_isPositionOverriden) {
+//				BuildingsManager.RemoveBuildingReservedPosition(this);
+//    			SetBuildingPosition();	
+//    		}
+//			if (!_isBuilderMoving && _isPositionOverriden) {
+//				BuildingsManager.BuildingFinishedConstruction(this);
+//    		} else {
+//    			ConstructBuilding();	
+//    		}
 		}
 	}
 	public void ConstructBuilding() {

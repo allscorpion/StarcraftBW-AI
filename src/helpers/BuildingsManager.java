@@ -62,6 +62,14 @@ public class BuildingsManager {
 
     public static void buildingDestroyed(Unit unit) {
     	if (unit.getType().isBuilding()) {
+    		if (BuildingsUnderConstruction.size() > 0) {
+    			Building constructingBuilding = GetBuildingFromUnit(unit);
+        		if (constructingBuilding == null) {
+        			StarCraftInstance.game.printf("Unable to find building");
+        		}else {
+        			constructingBuilding._structure = null;
+        		}	
+    		}
     		if (unit.getType() == UnitType.Terran_Command_Center) {
         		CommandCenters.remove(unit);
         	}
@@ -102,7 +110,10 @@ public class BuildingsManager {
 	 					) return n.getTilePosition();
 	 		}
 	 	}
-	
+//	 	Position builderRegionCenter = builder.getRegion().getCenter();
+//	 	bwta.Region tileRegion = BWTA.getRegion(aroundTile);
+//	 	DrawingHelper.writeTextMessage(String.valueOf(tileRegion.getDistance(builderRegionCenter)));
+	 	
 	 	while ((maxDist < stopDist) && (ret == null)) {
 	 		for (int i=aroundTile.getX()-maxDist; i<=aroundTile.getX()+maxDist; i++) {
 	 			for (int j=aroundTile.getY()-maxDist; j<=aroundTile.getY()+maxDist; j++) {
@@ -175,8 +186,10 @@ public class BuildingsManager {
     
     public static Building GetBuildingFromUnit(Unit unit) {
     	for (Building building : BuildingsUnderConstruction) {
-    		if (unit.getTilePosition().getDistance(building._buildingReservedPosition) <= Math.max(building._buildingType.tileSize().getX(), building._buildingType.tileSize().getY())) {
-    			return building;	
+    		if (building._buildingReservedPosition != null && building._buildingType != null) {
+    			if (unit.getTilePosition().getDistance(building._buildingReservedPosition) <= Math.max(building._buildingType.tileSize().getX(), building._buildingType.tileSize().getY())) {
+        			return building;	
+        		}	
     		}
 		}	
     	return null;		
@@ -184,8 +197,10 @@ public class BuildingsManager {
     
     public static Building GetBuildingFromWorker(Unit worker) {
     	for (Building building : BuildingsUnderConstruction) {
-    		if (worker.hashCode() == building._builder.hashCode()) {
-    			return building;	
+    		if (building._builder != null) {
+    			if (worker.getID() == building._builder.getID()) {
+        			return building;	
+        		}	
     		}
 		}	
     	return null;		
@@ -208,6 +223,11 @@ public class BuildingsManager {
     public static void BuildingFinishedConstruction(Building building) {
     	building._builder.stop();
     	WorkersManager.Workers.add(building._builder);
+    	WorkersManager.Builders.remove(building._builder);
+    	if (building._buildingType == UnitType.Terran_Command_Center) {
+			ResourcesManager.PotentialSupply += building._buildingType.supplyProvided();	
+			// split workers between bases
+		}
 		BuildingsUnderConstruction.remove(building);
     }
     

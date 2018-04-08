@@ -24,7 +24,7 @@ import models.Building;
 public class start extends DefaultBWListener {
 	
     private HashSet<Position> enemyBuildingMemory = new HashSet<Position>();
-   
+    
     private static Mirror mirror = new Mirror();
     public void run() {
         mirror.getModule().setEventListener(this);
@@ -92,12 +92,16 @@ public class start extends DefaultBWListener {
     
     @Override
     public void onUnitCreate(Unit unit) {
-    	WorkersManager.onWorkerCreate(unit);
-		BuildingsManager.buildingCreated(unit);
+    	if (!isMyUnit(unit)) return;
+    	StarCraftInstance.allMyUnits.add(unit);
+		WorkersManager.onWorkerCreate(unit);
+		BuildingsManager.buildingCreated(unit);	
     }
 
     @Override
     public void onUnitDestroy(Unit unit) {
+    	if (!StarCraftInstance.allMyUnits.contains(unit)) return;
+    	StarCraftInstance.allMyUnits.remove(unit);
     	BuildingsManager.buildingDestroyed(unit);
     	WorkersManager.onWorkerDestroy(unit);
     	UnitsManager.onUnitDestroy(unit);
@@ -105,6 +109,7 @@ public class start extends DefaultBWListener {
     
     @Override
     public void onUnitComplete(Unit unit) {
+    	if (!isMyUnit(unit)) return;
     	BuildingsManager.buildingComplete(unit);
     	UnitsManager.onUnitComplete(unit);
     }
@@ -114,20 +119,22 @@ public class start extends DefaultBWListener {
     	DrawingHelper.resetTextPos();
         
         //game.setTextSize(10);
-//        drawTextOnScreen("Workers " + Workers.size());
+        DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
 //        drawTextOnScreen("Command Centers " + CommandCenters.size());
         //drawTextOnScreen("Military Buildings " + MilitaryBuildings.size());
         // game.drawTextScreen(10, 10, "" + getCurrentMinerals());
-    	DrawingHelper.drawTextOnScreen("Current Minerals " + String.valueOf(ResourcesManager.getCurrentMinerals()));
-    	DrawingHelper.drawTextOnScreen("MineralsInReserve " + String.valueOf(ResourcesManager.MineralsInReserve));
-    	DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
-    	
+//    	DrawingHelper.drawTextOnScreen("Current Minerals " + String.valueOf(ResourcesManager.getCurrentMinerals()));
+//    	DrawingHelper.drawTextOnScreen("MineralsInReserve " + String.valueOf(ResourcesManager.MineralsInReserve));
+//    	DrawingHelper.drawTextOnScreen("BuildingsUnderConstruction " + String.valueOf(BuildingsManager.BuildingsUnderConstruction.size()));
+//    	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
-			DrawingHelper.drawTextOnUnit(b._builder, "Is building " + b._buildingType + " at " + b._buildingReservedPosition);
-    		StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition + "\n"));
-    		debugDetails.append(String.valueOf(b._builder.canBuild()) + "\n");
-    		debugDetails.append(String.valueOf(b._builder.isConstructing()) + "\n");
-    		DrawingHelper.drawTextAt(b._buildingReservedPosition.toPosition(), debugDetails.toString());	
+    		if (b._builder != null) {
+    			DrawingHelper.drawTextOnUnit(b._builder, "Is building " + b._buildingType + " at " + b._buildingReservedPosition);
+        		StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition + "\n"));
+        		debugDetails.append(String.valueOf(b._builder.canBuild()) + "\n");
+        		debugDetails.append(String.valueOf(b._builder.isConstructing()) + "\n");
+        		DrawingHelper.drawTextAt(b._buildingReservedPosition.toPosition(), debugDetails.toString());	
+    		}
     	}
     	
     	UnitsManager.attackUnits();
@@ -147,7 +154,7 @@ public class start extends DefaultBWListener {
     	WorkersManager.SendIdleWorkersToMinerals();
     	//DrawingHelper.drawTextOnScreen("shouldBuildDepo " + String.valueOf(ResourcesManager.isDepoRequired()));
     	//build depos
-    	BuildingsManager.GetClosestEmptyBase(null);
+    	//BuildingsManager.GetClosestEmptyBase(null);
     	if (ResourcesManager.isDepoRequired()) {
     		while (ResourcesManager.isDepoRequired() && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Supply_Depot.mineralPrice() && WorkersManager.GetWorker() != null) {
         		BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(), UnitType.Terran_Supply_Depot));
@@ -248,6 +255,17 @@ public class start extends DefaultBWListener {
 //    		}
 //    	}
 //    }
+    
+    private boolean isMyUnit (Unit unit) {
+    	boolean isMyUnit = false;
+    	for (Unit u : StarCraftInstance.self.getUnits()) {
+    		if (u.getID() == unit.getID()) {
+    			isMyUnit = true;
+    			break;
+    		}
+    	}
+    	return isMyUnit;
+    }
     
     @Override
     public void onEnd(boolean arg0) {
