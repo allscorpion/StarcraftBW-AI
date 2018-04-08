@@ -13,7 +13,9 @@ public class DrawingHelper {
     }
     
     public static void drawTextOnUnit(Unit myUnit, String text) {
-    	StarCraftInstance.game.drawTextMap(myUnit.getPosition().getX(), myUnit.getPosition().getY(), text);
+    	if (myUnit != null) {
+    		StarCraftInstance.game.drawTextMap(myUnit.getPosition().getX(), myUnit.getPosition().getY(), text);	
+    	}
     }
     
     public static void drawTextOnScreen(String text) {
@@ -21,11 +23,19 @@ public class DrawingHelper {
     	yTextPos += 20;
     }
     
+    public static void writeTextMessage(String text) {
+    	StarCraftInstance.game.sendText(text);
+    }
+    
     public static void drawTextAt(int x, int y, int text) {
     	drawTextAt(x, y, String.valueOf(text));
     }
     
     public static void drawTextAt(Position p, int text) {
+    	drawTextAt(p.getX(), p.getY(), String.valueOf(text));
+    }
+    
+    public static void drawTextAt(Position p, double text) {
     	drawTextAt(p.getX(), p.getY(), String.valueOf(text));
     }
     
