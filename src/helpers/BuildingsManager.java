@@ -85,9 +85,7 @@ public class BuildingsManager {
     		}
     		else if (unit.getType() == UnitType.Terran_Command_Center) {
     			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
-        		if (cbl == null) {
-        			StarCraftInstance.game.printf("Unable to find custom base location");
-        		}else {
+        		if (cbl != null) {
         			cbl.commandCenter = null;
         			BaseManager.DisallowOversaturationForAllCommandCenters();
         			BaseManager.TransferAdditionalWorkersToFreeBase();
@@ -115,6 +113,7 @@ public class BuildingsManager {
     		if (BuildingsUnderConstruction.size() > 0) {
     			Building finishedBuilding = GetBuildingFromUnit(unit);
         		if (finishedBuilding == null) {
+        			StarCraftInstance.game.pauseGame();
         			StarCraftInstance.game.printf("Unable to find building");
         		}else {
         			BuildingFinishedConstruction(finishedBuilding);

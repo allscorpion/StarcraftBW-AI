@@ -129,7 +129,7 @@ public class start extends DefaultBWListener {
     	StarCraftInstance.game.drawTextScreen(560, 20, "Supply " + StarCraftInstance.self.supplyUsed() / 2 + "/" + ResourcesManager.PotentialSupply / 2);
     	StarCraftInstance.game.drawTextScreen(560, 40, "APM " + StarCraftInstance.game.getAPM());
         //DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
-//        DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
+        DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
         
         
 //        drawTextOnScreen("Command Centers " + CommandCenters.size());
@@ -160,11 +160,11 @@ public class start extends DefaultBWListener {
     	}
     	
     	UnitsManager.attackUnits();
-    	
     	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
     		scoutSent = true;
     		Worker w = WorkersManager.GetWorker();
     		w.isScout = true;
+    		w.miningFrom = null;
     		ScoutsManager.ScoutEnemyBase(w.unit);
     	}
     	
@@ -199,22 +199,16 @@ public class start extends DefaultBWListener {
                     }
         		}
         	}
-//    		int maxWorkers = Math.min(70, BuildingsManager.CommandCenters.size() * 22);
-//    		for (CommandCenter myUnit : BuildingsManager.CommandCenters) {
-//    			if (myUnit.unit.getTrainingQueue().size() < 2 && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_SCV.mineralPrice() && WorkersManager.Workers.size() < maxWorkers) {
-//                    myUnit.unit.train(UnitType.Terran_SCV);
-//                }
-//    		}
-//    		for (Unit myUnit : BuildingsManager.MilitaryBuildings) {
-//    			if (myUnit.getType() == UnitType.Terran_Barracks && myUnit.getTrainingQueue().size() < 1 && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Marine.mineralPrice()) {
-//                    myUnit.train(UnitType.Terran_Marine);
-//                }
-//    		}
-//
+    		for (Unit myUnit : BuildingsManager.MilitaryBuildings) {
+    			if (myUnit.getType() == UnitType.Terran_Barracks && myUnit.getTrainingQueue().size() < 1 && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Marine.mineralPrice()) {
+                    myUnit.train(UnitType.Terran_Marine);
+                }
+    		}
+    		
     		Worker worker = WorkersManager.GetWorker();
         	//construct military buildings
     		if (worker != null) {
-    			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() < 2) {
+    			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() < 4) {
     				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
     				if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
     					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
@@ -222,17 +216,17 @@ public class start extends DefaultBWListener {
     					worker = null;
     				}
     			}
-//        		if (worker == null) {
-//        			worker = WorkersManager.GetWorker();	
-//        		}
-//    			if (BuildingsManager.CommandCenters.size() > 1) {
-//    				// build a barracks if we can afford it
-//    				if (ResourcesManager.getCurrentMineralsIncludingMilitary() >= UnitType.Terran_Barracks.mineralPrice() && BuildingsManager.BarracksCount < BuildingsManager.CommandCenters.size() * 2.5) {
-//    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Barracks));
-//    					BuildingsManager.BarracksCount++;
-//    					ResourcesManager.MilitaryMineralUnitCost += 50;
-//    				}						
-//    			}	
+        		if (worker == null) {
+        			worker = WorkersManager.GetWorker();	
+        		}
+    			if (BaseManager.GetTotalAmountOfCommandCenters() > 1) {
+    				// build a barracks if we can afford it
+    				if (ResourcesManager.getCurrentMineralsIncludingMilitary() >= UnitType.Terran_Barracks.mineralPrice() && BuildingsManager.BarracksCount < BaseManager.GetTotalAmountOfCommandCenters() * 2.5) {
+    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Barracks));
+    					BuildingsManager.BarracksCount++;
+    					ResourcesManager.MilitaryMineralUnitCost += 50;
+    				}						
+    			}	
     		}
     		
     	}
