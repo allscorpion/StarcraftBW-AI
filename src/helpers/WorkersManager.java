@@ -1,5 +1,7 @@
 package helpers;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -12,8 +14,9 @@ import java.util.stream.Stream;
 import bwapi.*;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import bwta.Chokepoint;
 import models.Building;
-import models.Mineral;
+import models.CustomBaseLocation;
 import models.Worker;
 
 public class WorkersManager {
@@ -61,38 +64,64 @@ public class WorkersManager {
     	return null;
     }
     
-    public static void SendIdleWorkersToMinerals(Position position) {
+    public static void SendIdleWorkersToMinerals() {
     	List<Unit> mineralFieldsSelected = new ArrayList<Unit>();
     	for (Worker w : Workers) {
-    		Unit myUnit = w.unit;
+    		// get closest base to worker
+    		final Unit myUnit = w.unit;
     		if (myUnit.isIdle() && myUnit.canMove()) {
-                Unit closestMineral = null;
+    			
+    			// go back to the unit the worker was previously mining from
+    			if (w.miningFrom != null) {
+    				myUnit.gather(w.miningFrom, false);
+    				continue;
+    			}
+    			
+    			CustomBaseLocation freeBase = BaseManager.GetBaseThatHasFreeSpaceForWorkers(myUnit);
+                
 
                 //find the closest mineral
-                for (Unit mineralField : StarCraftInstance.game.getUnitsInRadius(position, 300)) {
-                    if (mineralField.getType().isMineralField()) {
-                    	Mineral m = MineralsHelper.GetMineralFromUnit(mineralField);
-                    	if (m != null && m.amountOfWorkersAssignedToMineral >= 2) continue;
-                        if ((closestMineral == null || myUnit.getDistance(mineralField) < myUnit.getDistance(closestMineral)) && !mineralFieldsSelected.contains(mineralField)) {
-                            closestMineral = mineralField;
-                        }
-                    }
-                }
-
-                //if a mineral patch was found, send the worker to gather it
-                if (closestMineral != null) {
-                	mineralFieldsSelected.add(closestMineral);
-                	Mineral m = MineralsHelper.GetMineralFromUnit(closestMineral);
-                	if (m == null) {
-                		m = new Mineral(closestMineral);
-                		m.amountOfWorkersAssignedToMineral++;
-                		MineralsHelper.minerals.add(m);
-                	}else {
-                		m.amountOfWorkersAssignedToMineral++;
-                	}
-                    myUnit.gather(closestMineral, false);
+                if (freeBase != null) {
+                	SendWorkerToClosestMineral(freeBase, w, mineralFieldsSelected);
                 }
             }
     	}
+    }
+    
+    public static void SendWorkerToClosestMineral(CustomBaseLocation cbl, Worker w) {
+    	Unit myUnit = w.unit;
+    	Unit closestMineral = null;
+    	for (Unit mineralField : cbl.baseLocation.getMinerals()) {
+            if (mineralField.getType().isMineralField()) {
+                if ((closestMineral == null || myUnit.getDistance(mineralField) < myUnit.getDistance(closestMineral))) {
+                    closestMineral = mineralField;
+                }
+            }
+        }
+
+        //if a mineral patch was found, send the worker to gather it
+        if (closestMineral != null) {
+        	w.miningFrom = closestMineral;
+            myUnit.gather(closestMineral, false);
+        }	
+    }
+    
+    public static void SendWorkerToClosestMineral(CustomBaseLocation cbl, Worker w, List<Unit> mineralFieldsSelected) {
+    	Unit myUnit = w.unit;
+    	Unit closestMineral = null;
+    	for (Unit mineralField : cbl.baseLocation.getMinerals()) {
+            if (mineralField.getType().isMineralField()) {
+                if ((closestMineral == null || myUnit.getDistance(mineralField) < myUnit.getDistance(closestMineral)) && !mineralFieldsSelected.contains(mineralField)) {
+                    closestMineral = mineralField;
+                }
+            }
+        }
+
+        //if a mineral patch was found, send the worker to gather it
+        if (closestMineral != null) {
+        	mineralFieldsSelected.add(closestMineral);
+        	w.miningFrom = closestMineral;
+            myUnit.gather(closestMineral, false);
+        }	
     }
 }

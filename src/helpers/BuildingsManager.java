@@ -18,6 +18,8 @@ import bwta.BaseLocation;
 import bwta.Chokepoint;
 import helpers.ResourcesManager;
 import models.Building;
+import models.CommandCenter;
+import models.CustomBaseLocation;
 import models.Worker;
 
 
@@ -34,7 +36,6 @@ public class BuildingsManager {
 	
     public static HashSet<TilePosition> ReservedTiles = new HashSet<TilePosition>();
     public static List<Building> BuildingsUnderConstruction = new ArrayList<Building>();
-    public static List<Unit> CommandCenters = new ArrayList<Unit>();
     public static List<Unit> MilitaryBuildings = new ArrayList<Unit>();
     public static List<Chokepoint> InaccessibleChokepoints = new ArrayList<Chokepoint>();
     public static int BarracksCount = 0;
@@ -45,7 +46,13 @@ public class BuildingsManager {
     			//game.printf("Created depo at " + (self.supplyUsed() / 2) + " Supply");	
     		}
     		else if (unit.getType() == UnitType.Terran_Command_Center) {
-        		CommandCenters.add(unit);
+    			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
+        		if (cbl == null) {
+        			StarCraftInstance.game.printf("Unable to find custom base location");
+        		}else {
+        			cbl.commandCenter = new CommandCenter(unit);
+        			BaseManager.AllowOversaturationForAllCommandCenters();
+        		}
         	}
         	else if (unit.getType() == UnitType.Terran_Barracks) {
         		MilitaryBuildings.add(unit);
@@ -64,6 +71,7 @@ public class BuildingsManager {
 
     public static void buildingDestroyed(Unit unit) {
     	if (unit.getType().isBuilding()) {
+    		
     		if (BuildingsUnderConstruction.size() > 0) {
     			Building constructingBuilding = GetBuildingFromUnit(unit);
         		if (constructingBuilding == null) {
@@ -72,8 +80,18 @@ public class BuildingsManager {
         			constructingBuilding._structure = null;
         		}	
     		}
-    		if (unit.getType() == UnitType.Terran_Command_Center) {
-        		CommandCenters.remove(unit);
+    		if (unit.getType() == UnitType.Terran_Supply_Depot) {
+    			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
+    		}
+    		else if (unit.getType() == UnitType.Terran_Command_Center) {
+    			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
+        		if (cbl == null) {
+        			StarCraftInstance.game.printf("Unable to find custom base location");
+        		}else {
+        			cbl.commandCenter = null;
+        			BaseManager.DisallowOversaturationForAllCommandCenters();
+        			BaseManager.TransferAdditionalWorkersToFreeBase();
+        		}	
         	}
         	else if (unit.getType() == UnitType.Terran_Barracks) {
         		MilitaryBuildings.remove(unit);
@@ -85,6 +103,15 @@ public class BuildingsManager {
     
     public static void buildingComplete(Unit unit) {
     	if (unit.getType().isBuilding()) {
+    		if (unit.getType() == UnitType.Terran_Command_Center) {
+    			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
+        		if (cbl == null) {
+        			StarCraftInstance.game.printf("Unable to find custom base location");
+        		}else {
+        			BaseManager.DisallowOversaturationForAllCommandCenters();
+        			BaseManager.TransferAdditionalWorkersToFreeBase();
+        		}
+        	}
     		if (BuildingsUnderConstruction.size() > 0) {
     			Building finishedBuilding = GetBuildingFromUnit(unit);
         		if (finishedBuilding == null) {
@@ -239,27 +266,29 @@ public class BuildingsManager {
     }
     
 	public static BaseLocation GetClosestEmptyBase(Unit unit) {
-    	BaseLocation mySpawn = StarCraftInstance.mySpawn;
+    	BaseLocation mySpawn = BaseManager.mySpawn;
         BaseLocation closestBase = null;
         List<Position> baseLocationsTaken = new ArrayList<Position>();
-        for (Unit commandCenter : CommandCenters) {
-        	baseLocationsTaken.add(commandCenter.getPosition());
+        for (CustomBaseLocation cbl : BaseManager.baseLocations) {
+        	if (cbl.commandCenter != null) {
+        		baseLocationsTaken.add(cbl.baseLocation.getPosition());	
+        	}
         }
-        for (final BaseLocation baseLocation : StarCraftInstance.baseLocations) {
+        for (final CustomBaseLocation cbl : BaseManager.baseLocations) {
         	boolean isInaccessible = false;
-        	for (Chokepoint cp : baseLocation.getRegion().getChokepoints()) {
+        	for (Chokepoint cp : cbl.baseLocation.getRegion().getChokepoints()) {
         		if (InaccessibleChokepoints.contains(cp)) {
         			isInaccessible = true;
         			break;
         		}
         	}
-			if (!baseLocationsTaken.contains(baseLocation.getPosition()) && !isTileReserved(baseLocation.getTilePosition(), UnitType.Terran_Command_Center) && !isInaccessible && mySpawn.getRegion().isReachable(baseLocation.getRegion()) && !baseLocation.isIsland()) 
+			if (!baseLocationsTaken.contains(cbl.baseLocation.getPosition()) && !isTileReserved(cbl.baseLocation.getTilePosition(), UnitType.Terran_Command_Center) && !isInaccessible && mySpawn.getRegion().isReachable(cbl.baseLocation.getRegion()) && !cbl.baseLocation.isIsland()) 
 			{
 				if (closestBase == null) {
-					closestBase = baseLocation;
+					closestBase = cbl.baseLocation;
 				}
-				else if (baseLocation.getGroundDistance(mySpawn) < closestBase.getGroundDistance(mySpawn)) {
-					closestBase = baseLocation;	
+				else if (cbl.baseLocation.getGroundDistance(mySpawn) < closestBase.getGroundDistance(mySpawn)) {
+					closestBase = cbl.baseLocation;	
 				}
 			}
 		}

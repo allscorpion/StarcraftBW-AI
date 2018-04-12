@@ -38,15 +38,15 @@ public class UnitsManager{
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
     	if (StarCraftInstance.self.supplyUsed() / 2 == 200) {
     		for (Unit myUnit : MilitaryUnits) {
-    			if (myUnit.isIdle()) {
-    				for (BaseLocation b : StarCraftInstance.baseLocations) {
-            			// If this is a possible start location,
-            			if (b.isStartLocation() && b.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
-            				// do something. For example send some unit to attack that position:
-            				myUnit.attack(b.getPosition());
-            			}
-            		}	
-    			}
+//    			if (myUnit.isIdle()) {
+//    				for (BaseLocation b : StarCraftInstance.baseLocations) {
+//            			// If this is a possible start location,
+//            			if (b.isStartLocation() && b.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
+//            				// do something. For example send some unit to attack that position:
+//            				myUnit.attack(b.getPosition());
+//            			}
+//            		}	
+//    			}
     		}
     	}
 //    	if (closestEnemyUnits.size() > 0) {

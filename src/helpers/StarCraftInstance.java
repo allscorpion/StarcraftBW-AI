@@ -9,6 +9,7 @@ import bwapi.Player;
 import bwapi.Unit;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import models.CustomBaseLocation;
 
 public class StarCraftInstance {
 	public static void Start(Mirror _mirror) {
@@ -19,11 +20,6 @@ public class StarCraftInstance {
         allMyUnits = new ArrayList<Unit>();
 	}
 	
-	public static void SetBaseLocations() {
-		baseLocations = BWTA.getBaseLocations();
-        mySpawn = BWTA.getStartLocation(self);
-	}
-	
 	public static Mirror mirror;
 
 	public static Game game;
@@ -32,7 +28,4 @@ public class StarCraftInstance {
 	
 	public static List<Unit> allMyUnits;
 	
-	public static BaseLocation mySpawn;
-	
-	public static List<BaseLocation> baseLocations = new ArrayList<BaseLocation>();
 }
