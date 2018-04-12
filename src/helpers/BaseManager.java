@@ -137,14 +137,14 @@ public class BaseManager {
 				}
 			}
 		}
+		int workersSent = 0;
 		for (CustomBaseLocation cbl : baseLocations) {
 			if (cbl.commandCenter != null) {
 				if (!IsBaseFullySaturated(cbl)) {
 					// command center has free room, transfer workers
 					int amountOfFreeSpace = GetCommandCenterMaxMineralWorkers(cbl) - GetAmountOfWorkersAssignedToCommandCenter(cbl);
-					for (Worker w : extraWorkers) {
-						WorkersManager.SendWorkerToClosestMineral(cbl, w);
-						extraWorkers.remove(w);
+					for (int i = workersSent; i < extraWorkers.size(); i++) {
+						WorkersManager.SendWorkerToClosestMineral(cbl, extraWorkers.get(i));
 						amountOfFreeSpace--;
 						if (amountOfFreeSpace == 0) {
 							break;
@@ -157,8 +157,8 @@ public class BaseManager {
 		if (extraWorkers.size() > 0) {
 			for (CustomBaseLocation cbl : baseLocations) {
 				if (cbl.commandCenter != null) {
-					for (Worker w : extraWorkers) {
-						WorkersManager.SendWorkerToClosestMineral(cbl, w);
+					for (int i = workersSent; i < extraWorkers.size(); i++) {
+						WorkersManager.SendWorkerToClosestMineral(cbl, extraWorkers.get(i));
 					}
 				}
 			}
