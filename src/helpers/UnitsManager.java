@@ -17,20 +17,28 @@ import bwta.BWTA;
 import bwta.BaseLocation;
 import bwta.Chokepoint;
 import models.CustomBaseLocation;
+import models.MilitaryUnit;
 
 public class UnitsManager{
 	
-    public static List<Unit> MilitaryUnits = new ArrayList<Unit>();
+    public static List<MilitaryUnit> MilitaryUnits = new ArrayList<MilitaryUnit>();
     
     public static void onUnitDestroy(Unit unit) {
     	if (unit.getType() == UnitType.Terran_Marine) {
-    		MilitaryUnits.remove(unit);
+    		if (MilitaryUnits.size() > 0) {
+    			for (MilitaryUnit mu : MilitaryUnits) {
+    				if (mu.unit.getID() == unit.getID()) {
+    					MilitaryUnits.remove(mu);
+    					break;
+    				}
+    			}
+    		}
     	}
     }
     
     public static void onUnitComplete(Unit unit) {
     	if (unit.getType() == UnitType.Terran_Marine) {
-    		MilitaryUnits.add(unit);
+    		MilitaryUnits.add(new MilitaryUnit(unit));
     		//unit.attack(new Position(GetClosestEmptyBase(unit).getPosition().getX(), GetClosestEmptyBase(unit).getPosition().getY() + 20));
     	}
     }
@@ -79,7 +87,7 @@ public class UnitsManager{
 //    		}
 //    	}
     	if (closestEnemyUnits.size() > 0) {
-			for (final Unit myUnit : MilitaryUnits) {
+			for (final MilitaryUnit mu : MilitaryUnits) {
 				//if (myUnit.isIdle()) {
 //					Collections.sort(closestEnemyUnits, new Comparator<Unit>() {
 //			            @Override
@@ -88,6 +96,10 @@ public class UnitsManager{
 //			                        ? -1 : 1;
 //			            }
 //			        });
+					if (mu.LastOrderFrame + 100 > StarCraftInstance.game.getFrameCount()) {
+						continue;
+					}
+					Unit myUnit = mu.unit;
 					for (Unit enemyUnit : closestEnemyUnits) {
 						if (enemyUnit.isCloaked() && myUnit.isInWeaponRange(enemyUnit)) {
 							for (CustomBaseLocation cbl : BaseManager.baseLocations) {
@@ -99,8 +111,10 @@ public class UnitsManager{
 						}
 						
 						if (enemyUnit.isVisible() && enemyUnit.getType() == UnitType.Protoss_Zealot) {
+							mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
 							KiteMeleeUnits(myUnit, enemyUnit);	
 						}else if (enemyUnit.isVisible()) {
+							mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
 							KiteMeleeUnits(myUnit, enemyUnit);
 							//myUnit.attack(enemyUnit.getPosition());
 						}
