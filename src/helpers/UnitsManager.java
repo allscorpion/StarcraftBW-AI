@@ -53,9 +53,9 @@ public class UnitsManager{
     	double requiredDistance = myUnit.getType().groundWeapon().maxRange() * 0.66;
     	if (myUnit.getGroundWeaponCooldown() > 0 && distanceFromEnemy < requiredDistance) {
     		int xDifferential = (int) (requiredDistance - (myUnit.getPosition().getX() - enemyUnit.getPosition().getX()));
-    		int newX = xDifferential > 0 ? -xDifferential : xDifferential;
+    		int newX = xDifferential > 0 ? -(xDifferential) : xDifferential;
     		int yDifferential = (int) (requiredDistance - (myUnit.getPosition().getY() - enemyUnit.getPosition().getY()));
-    		int newY = yDifferential > 0 ? -yDifferential : yDifferential;
+    		int newY = yDifferential > 0 ? -(yDifferential) : yDifferential;
     		myUnit.move(
 				new Position(
 					myUnit.getPosition().getX() + newX, 
@@ -82,7 +82,7 @@ public class UnitsManager{
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
     	if (closestEnemyUnits.size() == 0) return;
 		for (final MilitaryUnit mu : MilitaryUnits) {
-			if (mu.LastOrderFrame + 10 > StarCraftInstance.game.getFrameCount()) {
+			if (mu.LastOrderFrame + 2 > StarCraftInstance.game.getFrameCount()) {
 				continue;
 			}
 			//if (myUnit.isIdle()) {
