@@ -17,20 +17,28 @@ import bwta.BWTA;
 import bwta.BaseLocation;
 import bwta.Chokepoint;
 import models.CustomBaseLocation;
+import models.MilitaryUnit;
 
 public class UnitsManager{
 	
-    public static List<Unit> MilitaryUnits = new ArrayList<Unit>();
+    public static List<MilitaryUnit> MilitaryUnits = new ArrayList<MilitaryUnit>();
     
     public static void onUnitDestroy(Unit unit) {
     	if (unit.getType() == UnitType.Terran_Marine) {
-    		MilitaryUnits.remove(unit);
+    		if (MilitaryUnits.size() > 0) {
+    			for (MilitaryUnit mu : MilitaryUnits) {
+    				if (mu.unit.getID() == unit.getID()) {
+    					MilitaryUnits.remove(mu);
+    					break;
+    				}
+    			}
+    		}
     	}
     }
     
     public static void onUnitComplete(Unit unit) {
     	if (unit.getType() == UnitType.Terran_Marine) {
-    		MilitaryUnits.add(unit);
+    		MilitaryUnits.add(new MilitaryUnit(unit));
     		//unit.attack(new Position(GetClosestEmptyBase(unit).getPosition().getX(), GetClosestEmptyBase(unit).getPosition().getY() + 20));
     	}
     }
@@ -72,21 +80,11 @@ public class UnitsManager{
     
     public static void attackUnits() {
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
-    	if (StarCraftInstance.self.supplyUsed() / 2 >= 200) {
-    		for (Unit myUnit : MilitaryUnits) {
-    			if (myUnit.isIdle()) {
-    				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
-            			// If this is a possible start location,
-            			if (cbl.baseLocation.isStartLocation() && cbl.baseLocation.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
-            				// do something. For example send some unit to attack that position:
-            				myUnit.attack(cbl.baseLocation.getPosition());
-            			}
-            		}
-    			}
-    		}
-    	}
     	if (closestEnemyUnits.size() == 0) return;
-		for (final Unit myUnit : MilitaryUnits) {
+		for (final MilitaryUnit mu : MilitaryUnits) {
+			if (mu.LastOrderFrame + 10 > StarCraftInstance.game.getFrameCount()) {
+				continue;
+			}
 			//if (myUnit.isIdle()) {
 //					Collections.sort(closestEnemyUnits, new Comparator<Unit>() {
 //			            @Override
@@ -98,13 +96,13 @@ public class UnitsManager{
 				Unit closestEnemy = null;
 				int distanceFromClosestEnemy = Integer.MAX_VALUE;
 				for (Unit enemyUnit : closestEnemyUnits) {
-					int distance = enemyUnit.getDistance(myUnit);
+					int distance = enemyUnit.getDistance(mu.unit);
 					if(distance < distanceFromClosestEnemy) {
 						distanceFromClosestEnemy = distance;
 						closestEnemy = enemyUnit;
 					}
 					
-					if (enemyUnit.isCloaked() && myUnit.isInWeaponRange(enemyUnit)) {
+					if (enemyUnit.isCloaked() && mu.unit.isInWeaponRange(enemyUnit)) {
 						for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 							if (cbl.commandCenter != null && cbl.commandCenter.unit.getAddon() != null) {
 								cbl.commandCenter.unit.getAddon().useTech(TechType.Scanner_Sweep, enemyUnit.getPosition());
@@ -115,13 +113,28 @@ public class UnitsManager{
 		    	}
 				if(closestEnemy == null) return;
 				if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
-					KiteMeleeUnits(myUnit, closestEnemy);	
+					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
+					KiteMeleeUnits(mu.unit, closestEnemy);
 				}else if (closestEnemy.isVisible()) {
-					KiteMeleeUnits(myUnit, closestEnemy);
+					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
+					KiteMeleeUnits(mu.unit, closestEnemy);
 					//myUnit.attack(enemyUnit.getPosition());
 				}
 			//}
-		}
+		} 
+		/*if (StarCraftInstance.self.supplyUsed() / 2 >= 200) {
+    		for (MilitaryUnit myUnit : MilitaryUnits) {
+    			if (myUnit.unit.isIdle()) {
+    				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
+            			// If this is a possible start location,
+            			if (cbl.baseLocation.isStartLocation() && cbl.baseLocation.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
+            				// do something. For example send some unit to attack that position:
+            				myUnit.unit.attack(cbl.baseLocation.getPosition());
+            			}
+            		}
+    			}
+    		}
+    	}*/
 		
     	// else {
 //			if (StarCraftInstance.self.allUnitCount(UnitType.Terran_Marine) < 50) {

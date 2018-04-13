@@ -91,6 +91,9 @@ public class BuildingsManager {
             		}
         		}	
     		}
+    		if (unit.getType() == UnitType.Terran_Academy) {
+    			Academy = null;
+    		}
     		if (unit.getType() == UnitType.Terran_Command_Center) {
     			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
         		if (cbl != null) {

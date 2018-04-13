@@ -58,6 +58,7 @@ public class WorkersManager {
     public static Worker GetWorker() {
     	for (Worker w : Workers) {
 			if (!w.isBuilding && !w.isScout) {
+				if (w.miningFrom != null && w.miningFrom.getType() == UnitType.Terran_Refinery) continue;
 				return w;
 			}
 		}	
