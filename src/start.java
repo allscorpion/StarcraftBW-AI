@@ -170,9 +170,7 @@ public class start extends DefaultBWListener {
     		}
     	}
     	
-    	if (StarCraftInstance.game.getFrameCount() % 10 == 0) {
-    		UnitsManager.attackUnits();	
-    	}
+    	UnitsManager.attackUnits();	
     	
     	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
     		scoutSent = true;
