@@ -15,6 +15,7 @@ import bwta.Chokepoint;
 import helpers.StarCraftInstance;
 import helpers.BaseManager;
 import helpers.BuildingsManager;
+import helpers.ConstructionManager;
 import helpers.DrawingHelper;
 import helpers.MiningHelper;
 import helpers.ResourcesManager;
@@ -290,17 +291,7 @@ public class start extends DefaultBWListener {
     					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Academy));
     				}						
     			}	
-        		if (worker == null) {
-        			worker = WorkersManager.GetWorker();	
-        		}
-    			if (BaseManager.GetTotalAmountOfCommandCenters() > 1) {
-    				// build a barracks if we can afford it
-    				if (ResourcesManager.getCurrentMineralsIncludingMilitary() >= UnitType.Terran_Barracks.mineralPrice() && BuildingsManager.BarracksCount < BaseManager.GetTotalAmountOfCommandCenters() * 2.5) {
-    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Barracks));
-    					BuildingsManager.BarracksCount++;
-    					ResourcesManager.MilitaryMineralUnitCost += 50;
-    				}						
-    			}	
+    			ConstructionManager.ConstructBuilding(UnitType.Terran_Barracks);
     		}
     		
     	}
