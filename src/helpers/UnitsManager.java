@@ -35,24 +35,52 @@ public class UnitsManager{
     	}
     }
     
+    public static void KiteMeleeUnits(Unit myUnit, Unit enemyUnit) {
+    	// myUnit.isAttacking() && (myUnit.isAttackFrame() || myUnit.isStartingAttack())
+    	//  || myUnit.getDistance(enemyUnit) < myUnit.getType().groundWeapon().maxRange() * 0.66
+    	// myUnit.getGroundWeaponCooldown() > 0
+    	//if ((myUnit.isAttackFrame() || myUnit.isStartingAttack())) return;
+    	if (myUnit.getGroundWeaponCooldown() > 0 && myUnit.getDistance(enemyUnit) < myUnit.getType().groundWeapon().maxRange() * 0.66) {
+    		myUnit.move(
+						new Position(
+							myUnit.getPosition().getX() + (myUnit.getPosition().getX() - enemyUnit.getPosition().getX()), 
+							myUnit.getPosition().getY() + (myUnit.getPosition().getY() - enemyUnit.getPosition().getY())
+						)
+					);
+    	}
+    	else {
+			if (
+				myUnit.canUseTech(TechType.Stim_Packs) && 
+				myUnit.getHitPoints() >= myUnit.getType().maxHitPoints() * 0.6 && 
+				myUnit.isInWeaponRange(enemyUnit) && 
+				!myUnit.isStimmed()
+			) {
+				myUnit.useTech(TechType.Stim_Packs);
+			}
+			if (myUnit.isIdle()) {
+				myUnit.attack(enemyUnit.getPosition());	
+			}
+    	}
+    }
+    
     public static void attackUnits() {
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
-    	if (StarCraftInstance.self.supplyUsed() / 2 == 200) {
-    		for (Unit myUnit : MilitaryUnits) {
-    			if (myUnit.isIdle()) {
-    				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
-            			// If this is a possible start location,
-            			if (cbl.baseLocation.isStartLocation() && cbl.baseLocation.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
-            				// do something. For example send some unit to attack that position:
-            				myUnit.attack(cbl.baseLocation.getPosition());
-            			}
-            		}	
-    			}
-    		}
-    	}
+//    	if (StarCraftInstance.self.supplyUsed() / 2 >= 200) {
+//    		for (Unit myUnit : MilitaryUnits) {
+//    			if (myUnit.isIdle()) {
+//    				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
+//            			// If this is a possible start location,
+//            			if (cbl.baseLocation.isStartLocation() && cbl.baseLocation.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
+//            				// do something. For example send some unit to attack that position:
+//            				myUnit.attack(cbl.baseLocation.getPosition());
+//            			}
+//            		}	
+//    			}
+//    		}
+//    	}
     	if (closestEnemyUnits.size() > 0) {
 			for (final Unit myUnit : MilitaryUnits) {
-				if (myUnit.isIdle()) {
+				//if (myUnit.isIdle()) {
 //					Collections.sort(closestEnemyUnits, new Comparator<Unit>() {
 //			            @Override
 //			            public int compare(Unit u1, Unit u2) {
@@ -61,11 +89,23 @@ public class UnitsManager{
 //			            }
 //			        });
 					for (Unit enemyUnit : closestEnemyUnits) {
-						if (enemyUnit.isVisible()) {
-							myUnit.attack(enemyUnit.getPosition());	
+						if (enemyUnit.isCloaked() && myUnit.isInWeaponRange(enemyUnit)) {
+							for (CustomBaseLocation cbl : BaseManager.baseLocations) {
+								if (cbl.commandCenter != null && cbl.commandCenter.unit.getAddon() != null) {
+									cbl.commandCenter.unit.getAddon().useTech(TechType.Scanner_Sweep, enemyUnit.getPosition());
+									break;
+								}
+							}
+						}
+						
+						if (enemyUnit.isVisible() && enemyUnit.getType() == UnitType.Protoss_Zealot) {
+							KiteMeleeUnits(myUnit, enemyUnit);	
+						}else if (enemyUnit.isVisible()) {
+							KiteMeleeUnits(myUnit, enemyUnit);
+							//myUnit.attack(enemyUnit.getPosition());
 						}
 			    	}
-				}
+				//}
 			}
 		}
     	// else {
