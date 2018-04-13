@@ -53,18 +53,25 @@ public class BaseManager {
 	public static int GetAmountOfWorkersAssignedToCommandCenter(CustomBaseLocation cbl) {
 		if (cbl.commandCenter != null) {
 			// found base location 
-			int totalMiningWorkers = SelectAllWorkersAssignedToCommandCenter(cbl).size();
+			int totalMiningWorkers = SelectAllMineralWorkersAssignedToCommandCenter(cbl).size();
+			int totalGasMiningWorkers = SelectAllGasWorkersAssignedToCommandCenter(cbl).size();
 			//StarCraftInstance.game.drawCircleMap(cbl.commandCenter.unit.getPosition().getX(), cbl.commandCenter.unit.getPosition().getY(), 300,  Color.Green);
 			
-			StringBuilder commandCenterText = new StringBuilder(totalMiningWorkers + "/" + GetCommandCenterMaxMineralWorkers(cbl) + "\n");
+			StringBuilder commandCenterText = new StringBuilder(totalMiningWorkers + "/" + ((int) (cbl.baseLocation.getMinerals().size() * amountOfWorkersPerMineral)) + "\n");
+			commandCenterText.append(totalGasMiningWorkers + "/" + (cbl.baseLocation.getGeysers().size() * 3) + "\n");
 			DrawingHelper.drawTextOnUnit(cbl.commandCenter.unit, commandCenterText.toString());
-			return totalMiningWorkers;
+			return totalMiningWorkers + totalGasMiningWorkers;
 		}
 		return 0;
 	}
 	
-	public static int GetCommandCenterMaxMineralWorkers(CustomBaseLocation cbl) {
-		return (int) (cbl.baseLocation.getMinerals().size() * amountOfWorkersPerMineral);
+	public static int GetCommandCenterMaxWorkers(CustomBaseLocation cbl) {
+		int mineralWorkers = (int) (cbl.baseLocation.getMinerals().size() * amountOfWorkersPerMineral);
+		int gasWorkers = 0;
+		if (cbl.baseLocation.getGeysers().size() > 0) {
+			gasWorkers = cbl.baseLocation.getGeysers().size() * 3;
+		}
+		return mineralWorkers + gasWorkers;
 	}
 	
 	public static int GetTotalAmountOfCommandCenters() {
@@ -98,6 +105,9 @@ public class BaseManager {
 		for (CustomBaseLocation cbl : baseLocations) {
 			if (cbl.commandCenter != null) {
 				totalWorkers += cbl.baseLocation.getMinerals().size() * amountOfWorkersPerMineral;
+				if (cbl.baseLocation.getGeysers().size() > 0) {
+					totalWorkers +=	cbl.baseLocation.getGeysers().size() * 3;
+				}
 			}
 		}
 		return totalWorkers;
@@ -141,9 +151,9 @@ public class BaseManager {
 		List<Worker> extraWorkers = new ArrayList<Worker>();
 		for (CustomBaseLocation cbl : baseLocations) {
 			if (cbl.commandCenter != null) {
-				int amountOfWorkersOverSaturated = GetAmountOfWorkersAssignedToCommandCenter(cbl) - GetCommandCenterMaxMineralWorkers(cbl);
+				int amountOfWorkersOverSaturated = GetAmountOfWorkersAssignedToCommandCenter(cbl) - GetCommandCenterMaxWorkers(cbl);
 				if (amountOfWorkersOverSaturated > 0) {
-					for (Worker w : SelectAllWorkersAssignedToCommandCenter(cbl)) {
+					for (Worker w : SelectAllMineralWorkersAssignedToCommandCenter(cbl)) {
 						extraWorkers.add(w);
 						amountOfWorkersOverSaturated--;
 						if (amountOfWorkersOverSaturated == 0) {
@@ -153,28 +163,31 @@ public class BaseManager {
 				}
 			}
 		}
-		int workersSent = 0;
-		for (CustomBaseLocation cbl : baseLocations) {
-			if (cbl.commandCenter != null) {
-				if (!IsBaseFullySaturated(cbl)) {
-					// command center has free room, transfer workers
-					int amountOfFreeSpace = GetCommandCenterMaxMineralWorkers(cbl) - GetAmountOfWorkersAssignedToCommandCenter(cbl);
-					for (int i = workersSent; i < extraWorkers.size(); i++) {
-						WorkersManager.SendWorkerToClosestMineral(cbl, extraWorkers.get(i));
-						amountOfFreeSpace--;
-						if (amountOfFreeSpace == 0) {
-							break;
+		if (extraWorkers.size() > 0) {
+			int workersSent = 0;
+			for (CustomBaseLocation cbl : baseLocations) {
+				if (cbl.commandCenter != null) {
+					if (!IsBaseFullySaturated(cbl)) {
+						// command center has free room, transfer workers
+						int amountOfFreeSpace = GetCommandCenterMaxWorkers(cbl) - GetAmountOfWorkersAssignedToCommandCenter(cbl);
+						for (int i = workersSent; i < extraWorkers.size(); i++) {
+							WorkersManager.SendWorkerToClosestMineral(cbl, extraWorkers.get(i));
+							amountOfFreeSpace--;
+							workersSent++;
+							if (amountOfFreeSpace == 0) {
+								break;
+							}
 						}
 					}
 				}
 			}
-		}
-		// we still have more workers allow oversaturation
-		if (extraWorkers.size() > 0) {
-			for (CustomBaseLocation cbl : baseLocations) {
-				if (cbl.commandCenter != null) {
-					for (int i = workersSent; i < extraWorkers.size(); i++) {
-						WorkersManager.SendWorkerToClosestMineral(cbl, extraWorkers.get(i));
+			// we still have more workers allow oversaturation
+			if (workersSent != extraWorkers.size()) {
+				for (CustomBaseLocation cbl : baseLocations) {
+					if (cbl.commandCenter != null) {
+						for (int i = workersSent; i < extraWorkers.size(); i++) {
+							WorkersManager.SendWorkerToClosestMineral(cbl, extraWorkers.get(i));
+						}
 					}
 				}
 			}
@@ -183,17 +196,35 @@ public class BaseManager {
 	
 	public static boolean IsBaseFullySaturated(CustomBaseLocation cbl) {
 		if (cbl.commandCenter != null) {
-			return !(GetAmountOfWorkersAssignedToCommandCenter(cbl) < GetCommandCenterMaxMineralWorkers(cbl));	
+			return !(GetAmountOfWorkersAssignedToCommandCenter(cbl) < GetCommandCenterMaxWorkers(cbl));	
 		}
 		return true;
 	}
 	
-	public static List<Worker> SelectAllWorkersAssignedToCommandCenter(CustomBaseLocation cbl){
+	public static List<Worker> SelectAllMineralWorkersAssignedToCommandCenter(CustomBaseLocation cbl){
 		List<Worker> workers = new ArrayList<Worker>();
 		if (cbl.commandCenter != null) {
 			for (Worker w : WorkersManager.Workers) {
-				if (cbl.baseLocation.getMinerals().contains(w.miningFrom)) {
-					workers.add(w);
+				if (w.miningFrom != null) {
+					if (cbl.baseLocation.getMinerals().contains(w.miningFrom)) {
+						workers.add(w);
+					}	
+				}
+			}	
+		}
+		return workers;
+	}
+	
+	public static List<Worker> SelectAllGasWorkersAssignedToCommandCenter(CustomBaseLocation cbl){
+		List<Worker> workers = new ArrayList<Worker>();
+		if (cbl.commandCenter != null) {
+			for (Worker w : WorkersManager.Workers) {
+				for (Unit geyser : cbl.baseLocation.getGeysers()) {
+					if (w.miningFrom != null) {
+						if (geyser.getID() == w.miningFrom.getID()) {
+							workers.add(w);	
+						}	
+					}
 				}
 			}	
 		}
@@ -205,7 +236,7 @@ public class BaseManager {
 		List<Worker> refineryWorkers = new ArrayList<Worker>();
 		for (CustomBaseLocation cbl : cbls) {
 			if (cbl.commandCenter != null) {
-				List<Worker> ccWorkers = SelectAllWorkersAssignedToCommandCenter(cbl);
+				List<Worker> ccWorkers = SelectAllMineralWorkersAssignedToCommandCenter(cbl);
 				if (ccWorkers.size() > 0) {
 					for (Worker w : ccWorkers) {
 						refineryWorkers.add(w);

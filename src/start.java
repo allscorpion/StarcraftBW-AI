@@ -101,6 +101,7 @@ public class start extends DefaultBWListener {
     
     @Override
     public void onUnitMorph(Unit unit) {
+    	if (!isMyUnit(unit)) return;
     	if (unit.getType() == UnitType.Terran_Refinery) {
     		BuildingsManager.buildingCreated(unit);	
     	}
@@ -216,6 +217,7 @@ public class start extends DefaultBWListener {
     	BuildingsManager.CheckBuildingProgress();
     	WorkersManager.SendIdleWorkersToMinerals();
     	BuildingsManager.storeEnemyBuidlings();
+    	//BaseManager.TransferAdditionalWorkersToFreeBase();
     	//DrawingHelper.drawTextOnScreen("shouldBuildDepo " + String.valueOf(ResourcesManager.isDepoRequired()));
     	//build depos
     	//BuildingsManager.GetClosestEmptyBase(null);
@@ -238,7 +240,7 @@ public class start extends DefaultBWListener {
                         }	
         			}
         			
-        			if ((BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxMineralWorkers(cbl) / 2) && cbl.baseLocation.getGeysers().size() > 0 && !cbl.commandCenter.hasGasStructure && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Refinery.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() > 1) {
+        			if (BuildingsManager.BarracksCount > 1 && cbl.baseLocation.getGeysers().size() > 0 && (BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2) && !cbl.commandCenter.hasGasStructure && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Refinery.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() > 1) {
         				cbl.commandCenter.hasGasStructure = true;
         				BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(), UnitType.Terran_Refinery));
         			}
