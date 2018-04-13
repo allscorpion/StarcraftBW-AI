@@ -31,7 +31,7 @@ public class ResourcesManager {
     	int amountOfSupplyQueued = 0;
     	
     	for (Unit myUnit : StarCraftInstance.self.getUnits()) {
-    		if (myUnit.getType().isBuilding() && myUnit.isTraining()) {
+    		if (myUnit.getType().isBuilding() && myUnit.isTraining() && myUnit.getTrainingQueue().size() > 0) {
     			amountOfSupplyQueued += myUnit.getTrainingQueue().get(0).supplyRequired();
     		}
     	} 

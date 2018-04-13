@@ -9,5 +9,6 @@ public class CommandCenter {
 		unit = u;
 	}
 	public Unit unit;
+	public boolean hasGasStructure;
 	public boolean allowOversaturation;
 }

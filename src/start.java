@@ -25,6 +25,7 @@ import helpers.ScoutsManager;
 import models.Building;
 import models.CommandCenter;
 import models.CustomBaseLocation;
+import models.ReservedTile;
 import models.Worker;
 
 public class start extends DefaultBWListener {
@@ -46,6 +47,7 @@ public class start extends DefaultBWListener {
         BWTA.readMap();
         BWTA.analyze();
         BaseManager.Init();
+        
         //System.out.println("Map data ready");
         //int i = 0;
         
@@ -53,7 +55,7 @@ public class start extends DefaultBWListener {
 //      StarCraftInstance.game.sendText("black sheep wall");
         // 10,000 Minerals and Gas
         //StarCraftInstance.game.sendText("show me the money");
-        
+        StarCraftInstance.game.enableFlag(1);
         BaseLocation mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
         for(BaseLocation baseLocation : BWTA.getBaseLocations()){
         	// StringBuilder baseText = new StringBuilder(String.valueOf(baseLocation.getGroundDistance(mySpawn)) + "\n");
@@ -95,6 +97,14 @@ public class start extends DefaultBWListener {
     public void onUnitDiscover(Unit unit) {
     	
     }
+    
+    @Override
+    public void onUnitMorph(Unit unit) {
+    	if (unit.getType() == UnitType.Terran_Refinery) {
+    		BuildingsManager.buildingCreated(unit);	
+    	}
+    }
+    
     
     @Override
     public void onUnitCreate(Unit unit) {
@@ -141,25 +151,29 @@ public class start extends DefaultBWListener {
     	for (CustomBaseLocation cbl : BaseManager.baseLocations) {
     		//DrawingHelper.drawTextOnScreen(String.valueOf(cbl.baseLocation.getPosition()));
     		BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl);
+    		
     	}
     	
 //    	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
     		if (b._buildingReservedPosition != null && b._buildingType != null) {
-    			DrawingHelper.drawTextOnScreen(b._buildingType + " is " + ((b._structure != null) ? "building" : "starting") + " at " + b._buildingReservedPosition);
+    			DrawingHelper.drawTextOnScreen(b._buildingType + " is " + ((b._structure != null) ? "building" : "starting") + " at " + b._buildingReservedPosition.tilePositionTopLeft);
     		}
-    		if (b._builder != null) {
-    			StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition + "\n"));
+    		if (b._builder != null && b._buildingReservedPosition != null) {
+    			StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition.tilePositionTopLeft + "\n"));
     			debugDetails.append(String.valueOf(b._builder.unit.canBuild()) + "\n");
         		debugDetails.append(String.valueOf(b._builder.unit.isConstructing()) + "\n");
-        		DrawingHelper.drawTextAt(b._buildingReservedPosition.toPosition(), debugDetails.toString());	
+        		DrawingHelper.drawTextAt(b._buildingReservedPosition.tilePositionTopLeft.toPosition(), debugDetails.toString());	
     			StringBuilder builderDetails = new StringBuilder("Can build " + String.valueOf(b._builder.unit.canBuild() + "\n"));
     			builderDetails.append("Constructing " + b._builder.unit.isConstructing());
     			DrawingHelper.drawTextOnUnit(b._builder.unit, builderDetails.toString());
     		}
     	}
     	
-    	UnitsManager.attackUnits();
+    	if (StarCraftInstance.game.getFrameCount() % 10 == 0) {
+    		UnitsManager.attackUnits();	
+    	}
+    	
     	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
     		scoutSent = true;
     		Worker w = WorkersManager.GetWorker();
@@ -167,6 +181,15 @@ public class start extends DefaultBWListener {
     		w.miningFrom = null;
     		ScoutsManager.ScoutEnemyBase(w.unit);
     	}
+    	
+    	for (ReservedTile rt : BuildingsManager.ReservedTiles) {
+    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeft.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Red);
+    	}
+    	
+    	for (Unit myUnit : UnitsManager.MilitaryUnits) {
+    		StarCraftInstance.game.drawLineMap(myUnit.getPosition(), myUnit.getOrderTargetPosition(), Color.Black);
+    		//StarCraftInstance.game.drawCircleMap(mu.getPosition(), UnitType.Terran_Marine.groundWeapon().maxRange(), Color.Red);
+    	} 
     	
     	// drawTextOnScreen("Military Mineral Production Cost " + String.valueOf(MilitaryMineralUnitCost));
     	// game.drawTextScreen(10, 50, "Amount of workers: " + Workers.size());
@@ -191,12 +214,20 @@ public class start extends DefaultBWListener {
     		//build units
         	for (CustomBaseLocation cbl : BaseManager.baseLocations) {
         		if (cbl.commandCenter != null) {
-        			// keep constant scv production if we can afford it
-        			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_SCV.mineralPrice()) {
-        				if (cbl.commandCenter.unit.getTrainingQueue().size() < 2 && WorkersManager.Workers.size() < BaseManager.TotalWorkersAllCommandCenters() - BaseManager.GetTotalAmountOfCommandCenters()) {
-        					cbl.commandCenter.unit.train(UnitType.Terran_SCV);
-        				}
-                    }
+        			if (BuildingsManager.Academy != null && cbl.commandCenter.unit.getAddon() == null && StarCraftInstance.game.canMake(UnitType.Terran_Comsat_Station)) {
+        				cbl.commandCenter.unit.buildAddon(UnitType.Terran_Comsat_Station);
+        			}else {
+            			// keep constant scv production if we can afford it
+        				if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_SCV.mineralPrice()) {
+            				if (cbl.commandCenter.unit.getTrainingQueue().size() < 2 && WorkersManager.Workers.size() < BaseManager.TotalWorkersAllCommandCenters() - BaseManager.GetTotalAmountOfCommandCenters()) {
+            					cbl.commandCenter.unit.train(UnitType.Terran_SCV);
+            				}
+                        }	
+        			}
+        			if (!cbl.commandCenter.hasGasStructure && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Refinery.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() > 1) {
+        				cbl.commandCenter.hasGasStructure = true;
+        				BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(), UnitType.Terran_Refinery));
+        			}
         		}
         	}
     		for (Unit myUnit : BuildingsManager.MilitaryBuildings) {
@@ -205,8 +236,18 @@ public class start extends DefaultBWListener {
                 }
     		}
     		
+    		if (BuildingsManager.Academy != null) {
+    			if (!BuildingsManager.Academy.isResearching()) {
+    				if (BuildingsManager.Academy.canResearch(TechType.Stim_Packs)) {
+        				BuildingsManager.Academy.research(TechType.Stim_Packs);
+        			}else if (BuildingsManager.Academy.canUpgrade(UpgradeType.U_238_Shells)) {
+        				BuildingsManager.Academy.upgrade(UpgradeType.U_238_Shells);
+        			}
+    			}
+    		}
+    		
     		Worker worker = WorkersManager.GetWorker();
-        	//construct military buildings
+        	//construct buildings
     		if (worker != null) {
     			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() < 4) {
     				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
@@ -216,6 +257,15 @@ public class start extends DefaultBWListener {
     					worker = null;
     				}
     			}
+    			if (worker == null) {
+        			worker = WorkersManager.GetWorker();	
+        		}
+    			if (BaseManager.GetTotalAmountOfCommandCenters() > 1 && StarCraftInstance.game.canMake(UnitType.Terran_Academy)) {
+    				// build a barracks if we can afford it
+    				if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Academy.mineralPrice() && BuildingsManager.Academy == null) {
+    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Academy));
+    				}						
+    			}	
         		if (worker == null) {
         			worker = WorkersManager.GetWorker();	
         		}

@@ -3,6 +3,7 @@ package helpers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import bwapi.Position;
@@ -102,7 +103,17 @@ public class BaseManager {
 		return totalWorkers;
 	}
 	
-	public static CustomBaseLocation GetBaseThatHasFreeSpaceForWorkers(final Unit myUnit) {
+	public static int ReserveCommandCenterAddonSpace() {
+		int totalWorkers = 0;
+		for (CustomBaseLocation cbl : baseLocations) {
+			if (cbl.commandCenter != null) {
+				//BuildingsManager.ReservedTiles.add(new TilePosition(cbl.commandCenter.unit.getTilePosition().getX() + UnitType.Terran_Comsat_Station.tileSize().getX(), cbl.commandCenter.unit.getTilePosition().getY()));
+			}
+		}
+		return totalWorkers;
+	}
+	
+	public static List<CustomBaseLocation> SortBasesByDistanceToUnit(final Unit myUnit) {
 		List<CustomBaseLocation> cbls = BaseManager.baseLocations;
 		Collections.sort(cbls, new Comparator<CustomBaseLocation>() {
             @Override
@@ -111,6 +122,11 @@ public class BaseManager {
 						? -1 : 1;
             }
         });
+		return cbls;
+	}
+	
+	public static CustomBaseLocation GetBaseThatHasFreeSpaceForWorkers(final Unit myUnit) {
+		List<CustomBaseLocation> cbls = SortBasesByDistanceToUnit(myUnit);
 		for (CustomBaseLocation cbl : cbls) {
 			if (cbl.commandCenter != null) {
 				if (cbl.commandCenter.allowOversaturation || !IsBaseFullySaturated(cbl)) {
@@ -182,6 +198,27 @@ public class BaseManager {
 			}	
 		}
 		return workers;
+	}
+	
+	public static void TransferWorkersToRefinery(Unit refinery){
+		List<CustomBaseLocation> cbls = SortBasesByDistanceToUnit(refinery);
+		List<Worker> refineryWorkers = new ArrayList<Worker>();
+		for (CustomBaseLocation cbl : cbls) {
+			if (cbl.commandCenter != null) {
+				List<Worker> ccWorkers = SelectAllWorkersAssignedToCommandCenter(cbl);
+				if (ccWorkers.size() > 0) {
+					for (Worker w : ccWorkers) {
+						refineryWorkers.add(w);
+						if (refineryWorkers.size() == 3) break;
+					}
+				}
+			}
+			if (refineryWorkers.size() == 3) break;
+		}
+		for (Worker w : refineryWorkers) {
+			w.miningFrom = refinery;
+			w.unit.gather(refinery);
+		}
 	}
 	
 	public static BaseLocation mySpawn;

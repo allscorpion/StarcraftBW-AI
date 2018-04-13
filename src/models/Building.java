@@ -18,7 +18,7 @@ public class Building {
 	public TilePosition _lastBuilderPosition;
 	public Unit _structure;
 	public UnitType _buildingType;
-	public TilePosition _buildingReservedPosition;
+	public ReservedTile _buildingReservedPosition;
 	public boolean _isBuilderMoving;
 	public boolean _isPositionOverriden;
 	public void Init(Worker w, UnitType buildingType, TilePosition position) {
@@ -54,8 +54,11 @@ public class Building {
 		SetBuildingPosition(BuildingsManager.getBuildTile(_builder.unit, _buildingType, _builder.unit.getTilePosition()));
 	}
 	public void SetBuildingPosition(TilePosition position) {
-		BuildingsManager.ReservedTiles.add(position);
-		_buildingReservedPosition = position;	
+		if (position != null) {
+			ReservedTile rt = new ReservedTile(position, _buildingType);
+			BuildingsManager.ReservedTiles.add(rt);
+			_buildingReservedPosition = rt;	
+		}
 	}
 	
 	
@@ -79,13 +82,13 @@ public class Building {
 	}
 	public void ConstructBuilding() {
 		if (_buildingReservedPosition != null) {
-			if (_builder.unit.canBuild(_buildingType, _buildingReservedPosition)) {
-    			if (_builder.unit.build(_buildingType, _buildingReservedPosition)) {
+			if (_builder.unit.canBuild(_buildingType, _buildingReservedPosition.tilePositionTopLeft)) {
+    			if (_builder.unit.build(_buildingType, _buildingReservedPosition.tilePositionTopLeft)) {
     				_isBuilderMoving = false;		
     			}
 			}else {
 				_isBuilderMoving = true;	
-				_builder.unit.move(_buildingReservedPosition.toPosition());
+				_builder.unit.move(_buildingReservedPosition.tilePositionTopLeft.toPosition());
 			}
 		}
 	}

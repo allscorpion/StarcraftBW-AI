@@ -20,6 +20,7 @@ import helpers.ResourcesManager;
 import models.Building;
 import models.CommandCenter;
 import models.CustomBaseLocation;
+import models.ReservedTile;
 import models.Worker;
 
 
@@ -34,8 +35,9 @@ public class BuildingsManager {
 	// Get new worker if old worker is dead
 	// Continue constructing building
 	
-    public static HashSet<TilePosition> ReservedTiles = new HashSet<TilePosition>();
+    public static HashSet<ReservedTile> ReservedTiles = new HashSet<ReservedTile>();
     public static List<Building> BuildingsUnderConstruction = new ArrayList<Building>();
+    public static Unit Academy = null;
     public static List<Unit> MilitaryBuildings = new ArrayList<Unit>();
     public static List<Chokepoint> InaccessibleChokepoints = new ArrayList<Chokepoint>();
     public static int BarracksCount = 0;
@@ -45,12 +47,16 @@ public class BuildingsManager {
     		if (unit.getType() == UnitType.Terran_Supply_Depot) {
     			//game.printf("Created depo at " + (self.supplyUsed() / 2) + " Supply");	
     		}
+    		else if (unit.getType() == UnitType.Terran_Academy) {
+    			BuildingsManager.Academy = unit;
+    		}
     		else if (unit.getType() == UnitType.Terran_Command_Center) {
     			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
         		if (cbl == null) {
         			StarCraftInstance.game.printf("Unable to find custom base location");
         		}else {
         			cbl.commandCenter = new CommandCenter(unit);
+        			BaseManager.ReserveCommandCenterAddonSpace();
         			BaseManager.AllowOversaturationForAllCommandCenters();
         		}
         	}
@@ -78,12 +84,14 @@ public class BuildingsManager {
         			StarCraftInstance.game.printf("Unable to find building");
         		}else {
         			constructingBuilding._structure = null;
+        			if (unit.getType() == UnitType.Terran_Supply_Depot) {
+            			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
+            		} else if (unit.getType() == UnitType.Terran_Command_Center) { 
+            			ResourcesManager.PotentialSupply -= UnitType.Terran_Command_Center.supplyProvided();
+            		}
         		}	
     		}
-    		if (unit.getType() == UnitType.Terran_Supply_Depot) {
-    			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
-    		}
-    		else if (unit.getType() == UnitType.Terran_Command_Center) {
+    		if (unit.getType() == UnitType.Terran_Command_Center) {
     			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
         		if (cbl != null) {
         			cbl.commandCenter = null;
@@ -110,10 +118,12 @@ public class BuildingsManager {
         			BaseManager.TransferAdditionalWorkersToFreeBase();
         		}
         	}
+    		else if (unit.getType() == UnitType.Terran_Refinery) {
+    			BaseManager.TransferWorkersToRefinery(unit);
+        	}
     		if (BuildingsUnderConstruction.size() > 0) {
     			Building finishedBuilding = GetBuildingFromUnit(unit);
         		if (finishedBuilding == null) {
-        			StarCraftInstance.game.pauseGame();
         			StarCraftInstance.game.printf("Unable to find building");
         		}else {
         			BuildingFinishedConstruction(finishedBuilding);
@@ -134,7 +144,9 @@ public class BuildingsManager {
 	 		for (Unit n : StarCraftInstance.game.neutral().getUnits()) {
 	 			if ((n.getType() == UnitType.Resource_Vespene_Geyser) &&
 	 					( Math.abs(n.getTilePosition().getX() - aroundTile.getX()) < stopDist ) &&
-	 					( Math.abs(n.getTilePosition().getY() - aroundTile.getY()) < stopDist )
+	 					( Math.abs(n.getTilePosition().getY() - aroundTile.getY()) < stopDist ) && 
+	 					!isTileReserved(n.getTilePosition(), buildingType) &&
+	 					StarCraftInstance.game.canBuildHere(n.getTilePosition(), buildingType, builder, false)
 	 					) return n.getTilePosition();
 	 		}
 	 	}
@@ -182,20 +194,27 @@ public class BuildingsManager {
 	 }
     
     public static boolean isTileReserved(TilePosition position, UnitType buildingType) {
-    	boolean isReserved = false;
-    	for (TilePosition reservedPosition : ReservedTiles) {
-    		if (reservedPosition.getDistance(position) <= Math.max(buildingType.tileSize().getX(), buildingType.tileSize().getY())) {
-    			isReserved = true;
-    			break;
+    	ReservedTile testPosition = new ReservedTile(position, buildingType);
+    	for (ReservedTile reservedPosition : ReservedTiles) {
+    		if (testPosition.isOverlappingTile(reservedPosition)) {
+    			return true;
     		}
+//    		if (reservedPosition.getDistance(position) <= Math.max(buildingType.tileSize().getX(), buildingType.tileSize().getY())) {
+//    			isReserved = true;
+//    			break;
+//    		}
 		}
-    	return isReserved;
+    	return false;
     }
     
     public static void CheckBuildingProgress() {
     	for (Building building : BuildingsUnderConstruction) {
+    		if (building._buildingReservedPosition == null) {
+    			BuildingFailedConstruction(building);
+    			break;
+    		}
     		building.GetNewBuilderIfRequired();
-    		if (StarCraftInstance.game.isExplored(building._buildingReservedPosition)) {
+    		if (StarCraftInstance.game.isExplored(building._buildingReservedPosition.tilePositionTopLeft)) {
     			// build failed
     			if (building._builder.unit.canBuild() && !building._builder.unit.isConstructing()) {
     				building.RestartBuild();	
@@ -215,7 +234,8 @@ public class BuildingsManager {
     public static Building GetBuildingFromUnit(Unit unit) {
     	for (Building building : BuildingsUnderConstruction) {
     		if (building._buildingReservedPosition != null && building._buildingType != null) {
-    			if (unit.getTilePosition().getDistance(building._buildingReservedPosition) <= Math.max(building._buildingType.tileSize().getX(), building._buildingType.tileSize().getY())) {
+    			ReservedTile unitRT = new ReservedTile(unit.getTilePosition(), building._buildingType); 
+    			if (unitRT.equals((building._buildingReservedPosition))) {
         			return building;	
         		}	
     		}
@@ -240,11 +260,11 @@ public class BuildingsManager {
     }
     
     public static void RemoveBuildingReservedPosition(Building building) {
-    	for (TilePosition position : ReservedTiles) {
-			if (position.getDistance(building._buildingReservedPosition) == 0)  {
+    	for (ReservedTile position : ReservedTiles) {
+    		if (building._buildingReservedPosition != null && position.equals(building._buildingReservedPosition)) {
 				ReservedTiles.remove(position);
 				break;
-			}
+    		}
 		}
     }
     
