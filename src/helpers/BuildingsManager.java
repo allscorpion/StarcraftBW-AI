@@ -63,33 +63,37 @@ public class BuildingsManager {
         	else if (unit.getType() == UnitType.Terran_Barracks) {
         		MilitaryBuildings.add(unit);
     		}
-    		if (BuildingsUnderConstruction.size() > 0) {
-    			Building constructingBuidling = GetBuildingFromUnit(unit);
-        		if (constructingBuidling == null) {
-        			StarCraftInstance.game.printf("Unable to find building");
-        		}else {
-        			constructingBuidling._structure = unit;
-        			BuildingStartedConstruction(constructingBuidling);
-        		}	
+    		if (!unit.getType().isAddon()) {
+    			if (BuildingsUnderConstruction.size() > 0) {
+        			Building constructingBuidling = GetBuildingFromUnit(unit);
+            		if (constructingBuidling == null) {
+            			StarCraftInstance.game.printf("Unable to find building");
+            		}else {
+            			constructingBuidling._structure = unit;
+            			BuildingStartedConstruction(constructingBuidling);
+            		}	
+        		}
     		}
+    	
     	}
     }
 
     public static void buildingDestroyed(Unit unit) {
     	if (unit.getType().isBuilding()) {
-    		
-    		if (BuildingsUnderConstruction.size() > 0) {
-    			Building constructingBuilding = GetBuildingFromUnit(unit);
-        		if (constructingBuilding == null) {
-        			StarCraftInstance.game.printf("Unable to find building");
-        		}else {
-        			constructingBuilding._structure = null;
-        			if (unit.getType() == UnitType.Terran_Supply_Depot) {
-            			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
-            		} else if (unit.getType() == UnitType.Terran_Command_Center) { 
-            			ResourcesManager.PotentialSupply -= UnitType.Terran_Command_Center.supplyProvided();
-            		}
-        		}	
+    		if (!unit.getType().isAddon()) {
+	    		if (BuildingsUnderConstruction.size() > 0) {
+	    			Building constructingBuilding = GetBuildingFromUnit(unit);
+	        		if (constructingBuilding == null) {
+	        			StarCraftInstance.game.printf("Unable to find building");
+	        		}else {
+	        			constructingBuilding._structure = null;
+	        			if (unit.getType() == UnitType.Terran_Supply_Depot) {
+	            			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
+	            		} else if (unit.getType() == UnitType.Terran_Command_Center) { 
+	            			ResourcesManager.PotentialSupply -= UnitType.Terran_Command_Center.supplyProvided();
+	            		}
+	        		}	
+	    		}
     		}
     		if (unit.getType() == UnitType.Terran_Academy) {
     			Academy = null;
@@ -124,13 +128,15 @@ public class BuildingsManager {
     		else if (unit.getType() == UnitType.Terran_Refinery) {
     			BaseManager.TransferWorkersToRefinery(unit);
         	}
-    		if (BuildingsUnderConstruction.size() > 0) {
-    			Building finishedBuilding = GetBuildingFromUnit(unit);
-        		if (finishedBuilding == null) {
-        			StarCraftInstance.game.printf("Unable to find building");
-        		}else {
-        			BuildingFinishedConstruction(finishedBuilding);
-        		}	
+    		if (!unit.getType().isAddon()) {
+	    		if (BuildingsUnderConstruction.size() > 0) {
+	    			Building finishedBuilding = GetBuildingFromUnit(unit);
+	        		if (finishedBuilding == null) {
+	        			StarCraftInstance.game.printf("Unable to find building");
+	        		}else {
+	        			BuildingFinishedConstruction(finishedBuilding);
+	        		}	
+	    		}
     		}
     	}
     }
