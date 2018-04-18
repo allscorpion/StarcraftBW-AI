@@ -6,13 +6,15 @@ import bwapi.Unit;
 
 public class ResourcesManager {
 
-	public static void Start() {
+	public static void Init() {
+		MineralsInReserve = 0;
+	    MilitaryMineralUnitCost = 0;
         PotentialSupply = StarCraftInstance.self.supplyTotal();
     }
 	
-    public static int MineralsInReserve = 0;
-    public static int MilitaryMineralUnitCost = 0;
-    public static int PotentialSupply = 0;
+    public static int MineralsInReserve;
+    public static int MilitaryMineralUnitCost;
+    public static int PotentialSupply;
     
     public static int getCurrentMinerals() {
     	int total = StarCraftInstance.self.minerals() - MineralsInReserve;

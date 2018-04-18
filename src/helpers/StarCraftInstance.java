@@ -6,6 +6,7 @@ import java.util.List;
 import bwapi.Game;
 import bwapi.Mirror;
 import bwapi.Player;
+import bwapi.Region;
 import bwapi.Unit;
 import bwta.BWTA;
 import bwta.BaseLocation;
@@ -16,7 +17,6 @@ public class StarCraftInstance {
 		mirror = _mirror;
 		game = mirror.getGame();
         self = game.self();
-        ResourcesManager.Start();
         allMyUnits = new ArrayList<Unit>();
 	}
 	

@@ -20,6 +20,7 @@ import models.Worker;
 public class BaseManager {
 	public static void Init() {
 		mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
+		baseLocations = new ArrayList<CustomBaseLocation>();
 		for (BaseLocation bl : BWTA.getBaseLocations()) {
 			baseLocations.add(new CustomBaseLocation(bl));	
 		}
@@ -254,7 +255,7 @@ public class BaseManager {
 	
 	public static BaseLocation mySpawn;
 	
-	public static List<CustomBaseLocation> baseLocations = new ArrayList<CustomBaseLocation>();
+	public static List<CustomBaseLocation> baseLocations;
 	
 	private static double amountOfWorkersPerMineral = 2.5;
 }

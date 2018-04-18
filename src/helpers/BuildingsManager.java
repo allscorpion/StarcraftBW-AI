@@ -26,22 +26,23 @@ import models.Worker;
 
 public class BuildingsManager {
 
-	// Resources to build structure
-	// Tile to build structure
-	// Move to tile if unexplored
-	// Build on tile if explored
-	// Check if building is constructing
-	// Check if worker is alive and constructing building
-	// Get new worker if old worker is dead
-	// Continue constructing building
+	public static void Init() {
+		ReservedTiles = new HashSet<ReservedTile>();
+	    BuildingsUnderConstruction = new ArrayList<Building>();
+	    Academy = null;
+	    MilitaryBuildings = new ArrayList<Unit>();
+	    InaccessibleChokepoints = new ArrayList<Chokepoint>();
+	    BarracksCount = 0;
+	    enemyBuildingMemory = new HashSet<Position>();
+	}
 	
-    public static HashSet<ReservedTile> ReservedTiles = new HashSet<ReservedTile>();
-    public static List<Building> BuildingsUnderConstruction = new ArrayList<Building>();
-    public static Unit Academy = null;
-    public static List<Unit> MilitaryBuildings = new ArrayList<Unit>();
-    public static List<Chokepoint> InaccessibleChokepoints = new ArrayList<Chokepoint>();
-    public static int BarracksCount = 0;
-    public static HashSet<Position> enemyBuildingMemory = new HashSet<Position>();
+    public static HashSet<ReservedTile> ReservedTiles;
+    public static List<Building> BuildingsUnderConstruction;
+    public static Unit Academy;
+    public static List<Unit> MilitaryBuildings;
+    public static List<Chokepoint> InaccessibleChokepoints;
+    public static int BarracksCount;
+    public static HashSet<Position> enemyBuildingMemory;
     public static void buildingCreated(Unit unit) {
     	if (unit.getType().isBuilding()) {
     		if (unit.getType() == UnitType.Terran_Supply_Depot) {

@@ -21,7 +21,11 @@ import models.Worker;
 
 public class WorkersManager {
 	
-    public static List<Worker> Workers = new ArrayList<Worker>();
+	public static void Init() {
+		Workers = new ArrayList<Worker>();
+	}
+	
+    public static List<Worker> Workers;
     
     public static void onWorkerCreate(Unit unit) {
     	if (unit.getType() == UnitType.Terran_SCV) {
