@@ -4,6 +4,7 @@ import bwapi.UnitType;
 import helpers.ConstructionManager;
 import helpers.ResourcesManager;
 import interfaces.IStructure;
+import models.Worker;
 
 public class Terran_Supply_Depot implements IStructure {
 
@@ -13,7 +14,7 @@ public class Terran_Supply_Depot implements IStructure {
 	}
 
 	@Override
-	public void OnSuccess() {
+	public void OnSuccess(Worker worker) {
 		
 	}
 

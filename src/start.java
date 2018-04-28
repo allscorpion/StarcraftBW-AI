@@ -200,26 +200,6 @@ public class start extends DefaultBWListener {
     	
     	//PathingManager.FindPath(BaseManager.mySpawn.getPosition(), new Position(0, 0));
     	
-    	/* 
-    	 * 
-    	 * 
-    	 * DEBUG ENDING 
-    	 * 
-    	 * 
-    	 * 
-    	 * */
-    	
-    	//MapAnalyser.ScanMap();
-    	UnitsManager.attackUnits();	
-    	
-    	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
-    		scoutSent = true;
-    		Worker w = WorkersManager.GetWorker();
-    		w.isScout = true;
-    		w.miningFrom = null;
-    		ScoutsManager.ScoutEnemyBase(w.unit);
-    	}
-    	
     	for (ReservedTile rt : BuildingsManager.ReservedTiles) {
     		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeft.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Red);
     	}
@@ -249,6 +229,28 @@ public class start extends DefaultBWListener {
 //			);
     	} 
     	
+    	/* 
+    	 * 
+    	 * 
+    	 * DEBUG ENDING 
+    	 * 
+    	 * 
+    	 * 
+    	 * */
+    	
+    	//MapAnalyser.ScanMap();
+    	UnitsManager.attackUnits();	
+    	
+    	if (!scoutSent && StarCraftInstance.self.supplyUsed() / 2 >= 8) {
+    		scoutSent = true;
+    		Worker w = WorkersManager.GetWorker();
+    		w.isScout = true;
+    		w.miningFrom = null;
+    		ScoutsManager.ScoutEnemyBase(w.unit);
+    	}
+    	
+    	
+    	
     	// drawTextOnScreen("Military Mineral Production Cost " + String.valueOf(MilitaryMineralUnitCost));
     	// game.drawTextScreen(10, 50, "Amount of workers: " + Workers.size());
         //StringBuilder units = new StringBuilder("My units:\n");
@@ -276,55 +278,6 @@ public class start extends DefaultBWListener {
     			}
 			}
 		}
-//    	if (ResourcesManager.isDepoRequired()) {
-//    		while (ResourcesManager.isDepoRequired() && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Supply_Depot.mineralPrice() && WorkersManager.GetWorker() != null) {
-//        		BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(), UnitType.Terran_Supply_Depot));
-//    		}	
-//    	} else {
-//    		//build units
-//        	for (CustomBaseLocation cbl : BaseManager.baseLocations) {
-//        		if (cbl.commandCenter != null) {
-//        			if (BuildingsManager.Academy != null && cbl.commandCenter.unit.getAddon() == null && StarCraftInstance.game.canMake(UnitType.Terran_Comsat_Station)) {
-//        				cbl.commandCenter.unit.buildAddon(UnitType.Terran_Comsat_Station);
-//        			}else {
-//            			// keep constant scv production if we can afford it
-//        				if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_SCV.mineralPrice()) {
-//            				if (cbl.commandCenter.unit.getTrainingQueue().size() < 2 && WorkersManager.Workers.size() < BaseManager.TotalWorkersAllCommandCenters() - BaseManager.GetTotalAmountOfCommandCenters()) {
-//            					cbl.commandCenter.unit.train(UnitType.Terran_SCV);
-//            				}
-//                        }	
-//        			}
-//        			//&& BaseManager.GetTotalAmountOfCommandCenters() > 1
-//        			if (BuildingsManager.BarracksCount > 1 && cbl.baseLocation.getGeysers().size() > 0 && (BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2) && !cbl.commandCenter.hasGasStructure && ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Refinery.mineralPrice() ) {
-//        				cbl.commandCenter.hasGasStructure = true;
-//        				BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(), UnitType.Terran_Refinery));
-//        			}
-//        		}
-//        	}
-//    		
-//    		if (BuildingsManager.Academy != null) {
-//    			if (!BuildingsManager.Academy.isResearching()) {
-//    				if (BuildingsManager.Academy.canResearch(TechType.Stim_Packs)) {
-//        				BuildingsManager.Academy.research(TechType.Stim_Packs);
-//        			}else if (BuildingsManager.Academy.canUpgrade(UpgradeType.U_238_Shells)) {
-//        				BuildingsManager.Academy.upgrade(UpgradeType.U_238_Shells);
-//        			}
-//    			}
-//    		}
-//    		
-//    		//Worker worker = WorkersManager.GetWorker();
-////    			if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() < 4) {
-////    				BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
-////    				if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
-////    					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
-////    					worker.miningFrom = null;
-////    					worker = null;
-////    				}
-////    			}
-//    		
-//    	}
-    	 
-//      
         //draw my units on screen
         //game.drawTextScreen(10, 25, units.toString());
     }
