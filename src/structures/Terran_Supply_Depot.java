@@ -1,6 +1,7 @@
 package structures;
 
 import bwapi.UnitType;
+import helpers.BuildingsManager;
 import helpers.ConstructionManager;
 import helpers.ResourcesManager;
 import interfaces.IStructure;
@@ -10,7 +11,8 @@ public class Terran_Supply_Depot implements IStructure {
 
 	@Override
 	public boolean RequirementsMetToBuild() {
-		return ResourcesManager.isDepoRequired() && ConstructionManager.CheckIfWeHaveResourcesToBuildIncludingTravelTime(UnitType.Terran_Supply_Depot);
+		return !BuildingsManager.isBuildingTypeReserved(UnitType.Terran_Supply_Depot)
+		&& ResourcesManager.isDepoRequired();
 	}
 
 	@Override

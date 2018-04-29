@@ -142,6 +142,15 @@ public class BuildingsManager {
     	}
     }
     
+    
+    public static boolean areAllMilitaryBuildingsProducing() {
+    	for (Unit militaryBuilding : MilitaryBuildings) {
+    		if (militaryBuilding.isBeingConstructed() || !militaryBuilding.isTraining()) return false;
+    	}
+    	return true;
+    }
+    
+    
  // Returns a suitable TilePosition to build a given building type near
  // specified TilePosition aroundTile, or null if not found. (builder parameter is our worker)
     public static TilePosition getBuildTile(Unit builder, UnitType buildingType, TilePosition aroundTile) {
@@ -203,16 +212,23 @@ public class BuildingsManager {
 	 	return ret;
 	 }
     
+    
+    
     public static boolean isTileReserved(TilePosition position, UnitType buildingType) {
     	ReservedTile testPosition = new ReservedTile(position, buildingType);
     	for (ReservedTile reservedPosition : ReservedTiles) {
     		if (testPosition.isOverlappingTile(reservedPosition)) {
     			return true;
     		}
-//    		if (reservedPosition.getDistance(position) <= Math.max(buildingType.tileSize().getX(), buildingType.tileSize().getY())) {
-//    			isReserved = true;
-//    			break;
-//    		}
+		}
+    	return false;
+    }
+    
+    public static boolean isBuildingTypeReserved(UnitType buildingType) {
+    	for (ReservedTile reservedPosition : ReservedTiles) {
+    		if (reservedPosition.isTemp && reservedPosition.buildingType == buildingType) {
+    			return true;
+    		}
 		}
     	return false;
     }
@@ -230,6 +246,7 @@ public class BuildingsManager {
     				building.RestartBuild();	
     			}
     		}else {
+    			building.RestartBuild();
     			// see if worker is getting closer otherwise delete building
 //    			if (building._buildingReservedPosition.getDistance(building._lastBuilderPosition) > 
 //    					building._buildingReservedPosition.getDistance(building._builder.getTilePosition())) {

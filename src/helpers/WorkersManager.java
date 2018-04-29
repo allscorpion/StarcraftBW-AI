@@ -74,7 +74,7 @@ public class WorkersManager {
     	for (Worker w : Workers) {
     		// get closest base to worker
     		final Unit myUnit = w.unit;
-    		if (myUnit.isIdle() && myUnit.canMove() && !w.isScout) {
+    		if (myUnit.isIdle() && myUnit.canMove() && !w.isBuilding && !w.isScout) {
     			
     			// go back to the unit the worker was previously mining from
     			if (w.miningFrom != null) {

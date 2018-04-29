@@ -143,7 +143,7 @@ public class start extends DefaultBWListener {
     @Override
     public void onFrame() {
     	
-    	ResourcesManager.CalcIncomePerFrame();
+    	ResourcesManager.calcIncome();
     	/* 
     	 * 
     	 * 
@@ -162,6 +162,7 @@ public class start extends DefaultBWListener {
     	StarCraftInstance.game.drawTextScreen(560, 40, "APM " + StarCraftInstance.game.getAPM());
         //DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
     	DrawingHelper.drawTextOnScreen("Income Per Minute - Minerals: " + ResourcesManager.MineralsPerMinute);
+    	DrawingHelper.drawTextOnScreen("Income Per Second - Minerals: " + ResourcesManager.MineralsPerMinute / 60);
     	DrawingHelper.drawTextOnScreen("Game time " + StarCraftInstance.game.elapsedTime() / 60 + ":" + (StarCraftInstance.game.elapsedTime() % 60 < 10 ? "0": "") + StarCraftInstance.game.elapsedTime() % 60);
     	DrawingHelper.drawTextOnScreen("Frames " + StarCraftInstance.game.getFrameCount());
         DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
@@ -185,21 +186,6 @@ public class start extends DefaultBWListener {
 //	    	}
     	}
     	
-    	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
-    		if (b._buildingReservedPosition != null && b._buildingType != null) {
-    			DrawingHelper.drawTextOnScreen(b._buildingType + " is " + ((b._structure != null) ? "building" : "starting") + " at " + b._buildingReservedPosition.tilePositionTopLeft);
-    		}
-    		if (b._builder != null && b._buildingReservedPosition != null) {
-    			StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition.tilePositionTopLeft + "\n"));
-    			debugDetails.append(String.valueOf(b._builder.unit.canBuild()) + "\n");
-        		debugDetails.append(String.valueOf(b._builder.unit.isConstructing()) + "\n");
-        		DrawingHelper.drawTextAt(b._buildingReservedPosition.tilePositionTopLeft.toPosition(), debugDetails.toString());	
-    			StringBuilder builderDetails = new StringBuilder("Can build " + String.valueOf(b._builder.unit.canBuild() + "\n"));
-    			builderDetails.append("Constructing " + b._builder.unit.isConstructing());
-    			DrawingHelper.drawTextOnUnit(b._builder.unit, builderDetails.toString());
-    		}
-    	}
-    	
     	//PathingManager.FindPath(BaseManager.mySpawn.getPosition(), new Position(0, 0));
     	
     	for (ReservedTile rt : BuildingsManager.ReservedTiles) {
@@ -207,6 +193,18 @@ public class start extends DefaultBWListener {
     	}
     	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
+//    		if (b._buildingReservedPosition != null && b._buildingType != null) {
+//    			DrawingHelper.drawTextOnScreen(b._buildingType + " is " + ((b._structure != null) ? "building" : "starting") + " at " + b._buildingReservedPosition.tilePositionTopLeft);
+//    		}
+//    		if (b._builder != null && b._buildingReservedPosition != null) {
+//    			StringBuilder debugDetails = new StringBuilder(String.valueOf(b._buildingReservedPosition.tilePositionTopLeft + "\n"));
+//    			debugDetails.append(String.valueOf(b._builder.unit.canBuild()) + "\n");
+//        		debugDetails.append(String.valueOf(b._builder.unit.isConstructing()) + "\n");
+//        		DrawingHelper.drawTextAt(b._buildingReservedPosition.tilePositionTopLeft.toPosition(), debugDetails.toString());	
+//    			StringBuilder builderDetails = new StringBuilder("Can build " + String.valueOf(b._builder.unit.canBuild() + "\n"));
+//    			builderDetails.append("Constructing " + b._builder.unit.isConstructing());
+//    			DrawingHelper.drawTextOnUnit(b._builder.unit, builderDetails.toString());
+//    		}
     		if (b._builder != null) {
     			StarCraftInstance.game.drawLineMap(b._builder.unit.getPosition(), b._builder.unit.getOrderTargetPosition(), Color.Black);	
     		}

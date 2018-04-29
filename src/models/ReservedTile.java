@@ -7,9 +7,13 @@ public class ReservedTile {
 	public ReservedTile(TilePosition tp, UnitType ut) {
 		tilePositionTopLeft = tp;
 		tilePositionBottomRight = new TilePosition(tp.getX() + ut.tileWidth(), tp.getY() + ut.tileHeight());
+		isTemp = true;
+		buildingType = ut;
 	}
 	public TilePosition tilePositionTopLeft;
 	public TilePosition tilePositionBottomRight;
+	public boolean isTemp;
+	public UnitType buildingType;
 	
 	public boolean isOverlappingTile(ReservedTile testPosition) {
 		if (testPosition.tilePositionBottomRight.getX() < tilePositionTopLeft.getX()) {

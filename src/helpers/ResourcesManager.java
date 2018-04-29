@@ -21,13 +21,13 @@ public class ResourcesManager {
     public static int MineralsPerMinute;
     public static int GasPerFrame;
     
-    public static void CalcIncomePerFrame() {
+    public static void calcIncome() {
     	if (StarCraftInstance.game.getFPS() == 0) return;
     	if (StarCraftInstance.game.getFrameCount() % StarCraftInstance.game.getFPS() != 0) return;
     	int currentMineralsPerMinute = 0;
     	for (Worker w : WorkersManager.Workers) {
     		if (w.unit.isGatheringMinerals() || w.unit.isCarryingMinerals()) {
-    			currentMineralsPerMinute += 40;
+    			currentMineralsPerMinute += 50;
     		}
     	}
     	MineralsPerMinute = currentMineralsPerMinute;

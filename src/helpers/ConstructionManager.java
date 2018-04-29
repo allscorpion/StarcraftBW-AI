@@ -95,7 +95,6 @@ public class ConstructionManager {
 			if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
 				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
 				worker.miningFrom = null;
-				worker = null;
 			}
 		}
 	}
@@ -113,11 +112,13 @@ public class ConstructionManager {
 		}
 	}
 	
-	private static void CheckStructure(IStructure structure, UnitType buildingType) {
+	private static void CheckStructure(IStructure structure, UnitType buildingType) {	
 		if (structure.RequirementsMetToBuild()) {
 			Worker worker = WorkersManager.GetWorker();	
-			BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, buildingType));	
-			structure.OnSuccess(worker);
+			if (worker != null) {
+				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, buildingType));	
+				structure.OnSuccess(worker);	
+			}
 		}
 	}
 	
