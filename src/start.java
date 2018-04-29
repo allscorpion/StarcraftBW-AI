@@ -260,7 +260,7 @@ public class start extends DefaultBWListener {
 //    		game.setLocalSpeed(30);
 //    	}
     	//storeEnemyBuidlings();
-    	BuildingsManager.CheckBuildingProgress();
+    	
     	WorkersManager.SendIdleWorkersToMinerals();
     	BuildingsManager.storeEnemyBuidlings();
     	//BaseManager.TransferAdditionalWorkersToFreeBase();
@@ -278,6 +278,7 @@ public class start extends DefaultBWListener {
     			}
 			}
 		}
+    	BuildingsManager.CheckBuildingProgress();
         //draw my units on screen
         //game.drawTextScreen(10, 25, units.toString());
     }

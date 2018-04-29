@@ -20,8 +20,8 @@ public class ConstructionManager {
 	private static List<CacheStructure> cachedStructures;
 	
 	public static void StartConstructionQueue() {
-		CacheStructure depo = ConstructBuilding(UnitType.Terran_Supply_Depot);
-		if (!depo.structureClass.RequirementsMetToBuild()) {
+		ConstructBuilding(UnitType.Terran_Supply_Depot);
+		if (!ResourcesManager.isDepoRequired()) {
 			BuildWorker();
 			BuildGas();
 			BuildBarracksUnit();
@@ -39,12 +39,11 @@ public class ConstructionManager {
 		return ResourcesManager.getCurrentMinerals() >= unitType.mineralPrice() && StarCraftInstance.self.gas() >= unitType.gasPrice();
 	}
 	
-	private static CacheStructure ConstructBuilding(UnitType buildingType) {
+	private static void ConstructBuilding(UnitType buildingType) {
 		try {
 			CacheStructure cs = GetCacheStructure(buildingType);
 			if (cs != null) {
 				CheckStructure(cs.structureClass, buildingType);
-				return cs;
 			}
 			Class<?> structureClass = Class.forName("structures." + buildingType.toString());
 			IStructure structure = (IStructure)structureClass.newInstance();
@@ -52,13 +51,11 @@ public class ConstructionManager {
 				CacheStructure newCs = new CacheStructure(buildingType,structure);
 				cachedStructures.add(newCs);
 				CheckStructure(structure, buildingType);
-				return newCs;
 			}
 			
 		} catch (ClassNotFoundException | SecurityException | InstantiationException | IllegalAccessException e) {
 			StarCraftInstance.game.printf(e.toString());
 		}
-		return null;
 	}
 	
 	private static void BuildWorker() {
@@ -89,8 +86,8 @@ public class ConstructionManager {
 	}
 	
 	private static void BuildBase() {
-		Worker worker = WorkersManager.GetWorker();
-		if (ResourcesManager.getCurrentMinerals() >= UnitType.Terran_Command_Center.mineralPrice() && BaseManager.GetTotalAmountOfCommandCenters() < 4) {
+		if (ResourcesManager.PotentialSupply / 2 > 10 && !BuildingsManager.isBuildingTypeReserved(UnitType.Terran_Command_Center) && BaseManager.GetTotalAmountOfCommandCenters() < 2) {
+			Worker worker = WorkersManager.GetWorker();
 			BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
 			if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
 				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));

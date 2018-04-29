@@ -3,6 +3,7 @@ package helpers;
 import bwapi.Game;
 import bwapi.Player;
 import bwapi.Unit;
+import bwapi.UnitType;
 import models.Worker;
 
 public class ResourcesManager {
@@ -38,9 +39,15 @@ public class ResourcesManager {
     	return total;
     }
     
-    // so that we don't build any additional buildings without producing out of our current structures
-    public static int getCurrentMineralsIncludingMilitary() {
-    	int total = StarCraftInstance.self.minerals() - MineralsInReserve - MilitaryMineralUnitCost;
+    public static int getCurrentMineralsIncludingUnitsQueue() {
+    	int total = getCurrentMinerals();
+    	for (Unit myUnit : StarCraftInstance.self.getUnits()) {
+    		if (myUnit.getType().isBuilding() && myUnit.isTraining() && myUnit.getTrainingQueue().size() > 0) {
+    			for (UnitType trainingUnit : myUnit.getTrainingQueue()) {
+    				total -= trainingUnit.mineralPrice();	
+    			}
+    		}
+    	} 
     	return total;
     }
     

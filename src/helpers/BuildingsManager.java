@@ -70,6 +70,7 @@ public class BuildingsManager {
             		if (constructingBuidling == null) {
             			StarCraftInstance.game.printf("Unable to find building");
             		}else {
+            			constructingBuidling._buildingReservedPosition.isTemp = false;
             			constructingBuidling._structure = unit;
             			BuildingStartedConstruction(constructingBuidling);
             		}	
