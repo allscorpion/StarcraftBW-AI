@@ -10,7 +10,7 @@ public class Terran_Supply_Depot implements IStructure {
 
 	@Override
 	public boolean RequirementsMetToBuild() {
-		return ResourcesManager.isDepoRequired() && ConstructionManager.CheckIfWeHaveResourcesToBuild(UnitType.Terran_Supply_Depot);
+		return ResourcesManager.isDepoRequired() && ConstructionManager.CheckIfWeHaveResourcesToBuildIncludingTravelTime(UnitType.Terran_Supply_Depot);
 	}
 
 	@Override

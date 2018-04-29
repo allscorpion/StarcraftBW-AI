@@ -13,8 +13,8 @@ public class Terran_Barracks implements IStructure {
 	@Override
 	public boolean RequirementsMetToBuild() {
 		return  BaseManager.GetTotalAmountOfCommandCenters() > 1 && 
-				ConstructionManager.CheckIfWeHaveResourcesToBuild(UnitType.Terran_Barracks) && 
-				BuildingsManager.BarracksCount < BaseManager.GetTotalAmountOfCommandCenters() * 5;
+				ConstructionManager.CheckIfWeHaveResourcesToBuildIncludingTravelTime(UnitType.Terran_Barracks) && 
+				BuildingsManager.BarracksCount < BaseManager.GetTotalAmountOfCommandCenters() * 2.5;
 	}
 
 	@Override

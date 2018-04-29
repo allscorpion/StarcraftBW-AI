@@ -143,6 +143,7 @@ public class start extends DefaultBWListener {
     @Override
     public void onFrame() {
     	
+    	ResourcesManager.CalcIncomePerFrame();
     	/* 
     	 * 
     	 * 
@@ -160,6 +161,7 @@ public class start extends DefaultBWListener {
     	StarCraftInstance.game.drawTextScreen(560, 20, "Supply " + StarCraftInstance.self.supplyUsed() / 2 + "/" + ResourcesManager.PotentialSupply / 2);
     	StarCraftInstance.game.drawTextScreen(560, 40, "APM " + StarCraftInstance.game.getAPM());
         //DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
+    	DrawingHelper.drawTextOnScreen("Income Per Minute - Minerals: " + ResourcesManager.MineralsPerMinute);
     	DrawingHelper.drawTextOnScreen("Game time " + StarCraftInstance.game.elapsedTime() / 60 + ":" + (StarCraftInstance.game.elapsedTime() % 60 < 10 ? "0": "") + StarCraftInstance.game.elapsedTime() % 60);
     	DrawingHelper.drawTextOnScreen("Frames " + StarCraftInstance.game.getFrameCount());
         DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
@@ -177,7 +179,7 @@ public class start extends DefaultBWListener {
 //    			StarCraftInstance.game.drawTextMap(c.getCenter(), String.valueOf(cbl.hashCode()));
 //    		}
     		//DrawingHelper.drawTextOnScreen(String.valueOf(cbl.baseLocation.getPosition()));
-    		//BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl);
+    		BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl);
 //    		for(Position position : cbl.baseLocation.getRegion().getPolygon().getPoints()){
 //        		StarCraftInstance.game.drawBoxMap(position, new Position(position.getX() + 10, position.getY() + 10), Color.Grey);
 //	    	}

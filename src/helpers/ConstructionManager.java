@@ -35,6 +35,10 @@ public class ConstructionManager {
 		return ResourcesManager.getCurrentMinerals() >= unitType.mineralPrice() && StarCraftInstance.self.gas() >= unitType.gasPrice();
 	}
 	
+	public static boolean CheckIfWeHaveResourcesToBuildIncludingTravelTime(UnitType unitType) {
+		return ResourcesManager.getCurrentMinerals() >= unitType.mineralPrice() && StarCraftInstance.self.gas() >= unitType.gasPrice();
+	}
+	
 	private static CacheStructure ConstructBuilding(UnitType buildingType) {
 		try {
 			CacheStructure cs = GetCacheStructure(buildingType);

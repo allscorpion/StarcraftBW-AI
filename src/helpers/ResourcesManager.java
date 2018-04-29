@@ -3,6 +3,7 @@ package helpers;
 import bwapi.Game;
 import bwapi.Player;
 import bwapi.Unit;
+import models.Worker;
 
 public class ResourcesManager {
 
@@ -10,11 +11,27 @@ public class ResourcesManager {
 		MineralsInReserve = 0;
 	    MilitaryMineralUnitCost = 0;
         PotentialSupply = StarCraftInstance.self.supplyTotal();
+        MineralsPerMinute = 0;
+        GasPerFrame = 0;
     }
 	
     public static int MineralsInReserve;
     public static int MilitaryMineralUnitCost;
     public static int PotentialSupply;
+    public static int MineralsPerMinute;
+    public static int GasPerFrame;
+    
+    public static void CalcIncomePerFrame() {
+    	if (StarCraftInstance.game.getFPS() == 0) return;
+    	if (StarCraftInstance.game.getFrameCount() % StarCraftInstance.game.getFPS() != 0) return;
+    	int currentMineralsPerMinute = 0;
+    	for (Worker w : WorkersManager.Workers) {
+    		if (w.unit.isGatheringMinerals() || w.unit.isCarryingMinerals()) {
+    			currentMineralsPerMinute += 40;
+    		}
+    	}
+    	MineralsPerMinute = currentMineralsPerMinute;
+    }
     
     public static int getCurrentMinerals() {
     	int total = StarCraftInstance.self.minerals() - MineralsInReserve;
