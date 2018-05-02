@@ -86,7 +86,21 @@ public class ConstructionManager {
 	}
 	
 	private static void BuildBase() {
-		if (ResourcesManager.PotentialSupply / 2 > 10 && !BuildingsManager.isBuildingTypeReserved(UnitType.Terran_Command_Center) && BaseManager.GetTotalAmountOfCommandCenters() < 2) {
+		boolean allowBaseCreation = false;
+		if (BaseManager.GetTotalAmountOfCommandCenters() == 1) {
+			if (ResourcesManager.PotentialSupply / 2 > 10 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+				allowBaseCreation = true;
+			}
+		}else if (BaseManager.GetTotalAmountOfCommandCenters() == 2) {
+			if (BuildingsManager.BarracksCount >= 5 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+				allowBaseCreation = true;
+			}
+		} else if (BaseManager.GetTotalAmountOfCommandCenters() == 3) {
+			if (BuildingsManager.BarracksCount >= 7.5 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+				allowBaseCreation = true;
+			}
+		}
+		if (allowBaseCreation) {
 			Worker worker = WorkersManager.GetWorker();
 			BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
 			if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {

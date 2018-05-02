@@ -225,13 +225,14 @@ public class BuildingsManager {
     	return false;
     }
     
-    public static boolean isBuildingTypeReserved(UnitType buildingType) {
+    public static int amountOfBuildingTypeReserved(UnitType buildingType) {
+    	int totalReserved = 0;
     	for (ReservedTile reservedPosition : ReservedTiles) {
     		if (reservedPosition.isTemp && reservedPosition.buildingType == buildingType) {
-    			return true;
+    			totalReserved++;
     		}
 		}
-    	return false;
+    	return totalReserved;
     }
     
     public static void CheckBuildingProgress() {
