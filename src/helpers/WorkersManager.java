@@ -58,15 +58,34 @@ public class WorkersManager {
     		}
     	}
     }
-   
+    
+    private static boolean IsValidWorker(Worker w) {
+    	return  !w.isBuilding && 
+				!w.isScout && 
+				!w.unit.isCarryingGas() && 
+				!w.unit.isCarryingMinerals() && 
+				!(w.miningFrom != null && w.miningFrom.getType() == UnitType.Terran_Refinery);
+    }
+    
     public static Worker GetWorker() {
     	for (Worker w : Workers) {
-			if (!w.isBuilding && !w.isScout && !w.unit.isCarryingGas() && !w.unit.isCarryingMinerals()) {
-				if (w.miningFrom != null && w.miningFrom.getType() == UnitType.Terran_Refinery) continue;
+			if (IsValidWorker(w)) {
 				return w;
 			}
 		}	
     	return null;
+    }
+    
+    public static Worker GetWorker(TilePosition position) {
+    	Worker closestWorker = null;
+    	for (Worker w : Workers) {
+    		if (IsValidWorker(w)) {
+				if (closestWorker == null || w.unit.getTilePosition().getDistance(position) < closestWorker.unit.getTilePosition().getDistance(position)) {
+					closestWorker = w;
+				}
+			}
+		}	
+    	return closestWorker;
     }
     
     public static void SendIdleWorkersToMinerals() {

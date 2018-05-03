@@ -315,7 +315,7 @@ public class BuildingsManager {
     	BuildingFinishedConstruction(building);
     }
     
-	public static BaseLocation GetClosestEmptyBase(Unit unit) {
+	public static BaseLocation GetClosestEmptyBase() {
     	BaseLocation mySpawn = BaseManager.mySpawn;
         BaseLocation closestBase = null;
         List<Position> baseLocationsTaken = new ArrayList<Position>();

@@ -21,10 +21,22 @@ public class BaseManager {
 	public static void Init() {
 		mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
 		baseLocations = new ArrayList<CustomBaseLocation>();
+		spawnLocations = new ArrayList<BaseLocation>();
 		for (BaseLocation bl : BWTA.getBaseLocations()) {
 			baseLocations.add(new CustomBaseLocation(bl));	
+			if (bl.isStartLocation() && bl.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
+				spawnLocations.add(bl);
+			}
 		}
 	}
+	
+	public static BaseLocation mySpawn;
+	
+	public static List<CustomBaseLocation> baseLocations;
+	
+	public static List<BaseLocation> spawnLocations;
+	
+	private static double amountOfWorkersPerMineral = 2.5;
 	
 	public static CustomBaseLocation GetCustomBaseLocationFromPosition(Position p) {
 		for (CustomBaseLocation cbl : baseLocations) {
@@ -253,9 +265,5 @@ public class BaseManager {
 		}
 	}
 	
-	public static BaseLocation mySpawn;
 	
-	public static List<CustomBaseLocation> baseLocations;
-	
-	private static double amountOfWorkersPerMineral = 2.5;
 }

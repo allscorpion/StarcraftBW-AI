@@ -30,6 +30,7 @@ import models.CommandCenter;
 import models.CustomBaseLocation;
 import models.MilitaryUnit;
 import models.ReservedTile;
+import models.Scout;
 import models.Worker;
 
 public class start extends DefaultBWListener {
@@ -142,7 +143,6 @@ public class start extends DefaultBWListener {
     
     @Override
     public void onFrame() {
-    	
     	ResourcesManager.calcIncome();
     	/* 
     	 * 
@@ -246,8 +246,11 @@ public class start extends DefaultBWListener {
     		Worker w = WorkersManager.GetWorker();
     		w.isScout = true;
     		w.miningFrom = null;
-    		ScoutsManager.ScoutEnemyBase(w.unit);
+    		ScoutsManager.scouts.add(new Scout(w.unit));
+    		w.unit.stop();
     	}
+    	
+    	ScoutsManager.ScoutEnemyBase();
     	
     	
     	

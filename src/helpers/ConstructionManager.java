@@ -3,6 +3,7 @@ package helpers;
 import java.util.ArrayList;
 import java.util.List;
 
+import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BaseLocation;
@@ -24,9 +25,9 @@ public class ConstructionManager {
 		if (!ResourcesManager.isDepoRequired()) {
 			BuildWorker();
 			BuildGas();
-			BuildBarracksUnit();
-			BuildBase();
 			ConstructBuilding(UnitType.Terran_Academy);
+			BuildBarracksUnit();
+			//BuildBase();
 			ConstructBuilding(UnitType.Terran_Barracks);	
 		}
 	}
@@ -79,7 +80,8 @@ public class ConstructionManager {
 			if (cbl.commandCenter != null) {
 				if (BuildingsManager.BarracksCount > 1 && cbl.baseLocation.getGeysers().size() > 0 && (BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2) && !cbl.commandCenter.hasGasStructure && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Refinery)) {
 					cbl.commandCenter.hasGasStructure = true;
-					BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(), UnitType.Terran_Refinery));
+					TilePosition gasPosition = cbl.baseLocation.getGeysers().get(0).getTilePosition();
+					BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(gasPosition), UnitType.Terran_Refinery, gasPosition));
 				}
 			}
 		}
@@ -101,8 +103,8 @@ public class ConstructionManager {
 			}
 		}
 		if (allowBaseCreation) {
-			Worker worker = WorkersManager.GetWorker();
-			BaseLocation bl = BuildingsManager.GetClosestEmptyBase(worker.unit);
+			BaseLocation bl = BuildingsManager.GetClosestEmptyBase();
+			Worker worker = WorkersManager.GetWorker(bl.getTilePosition());
 			if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
 				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
 				worker.miningFrom = null;
