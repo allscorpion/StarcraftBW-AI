@@ -94,7 +94,7 @@ public class BuildingsManager {
 	            		} else if (unit.getType() == UnitType.Terran_Command_Center) { 
 	            			ResourcesManager.PotentialSupply -= UnitType.Terran_Command_Center.supplyProvided();
 	            		}
-	        		}	
+	        		}
 	    		}
     		}
     		if (unit.getType() == UnitType.Terran_Academy) {
@@ -112,6 +112,8 @@ public class BuildingsManager {
         		MilitaryBuildings.remove(unit);
         		ResourcesManager.MilitaryMineralUnitCost -= 50;
         		BarracksCount--;
+    		} else if (unit.getType() == UnitType.Terran_Supply_Depot) {
+    			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
     		}
     	}
     }
