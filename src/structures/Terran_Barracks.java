@@ -12,10 +12,21 @@ public class Terran_Barracks implements IStructure {
 
 	@Override
 	public boolean RequirementsMetToBuild() {
-		return  BaseManager.GetTotalAmountOfCommandCenters() > 1 && 
-				!BuildingsManager.isBuildingTypeReserved(UnitType.Terran_Barracks) && 
-				BuildingsManager.areAllMilitaryBuildingsProducing() &&
-				BuildingsManager.BarracksCount < BaseManager.GetTotalAmountOfCommandCenters() * 2.5;
+		if (BaseManager.GetTotalAmountOfCommandCenters() < 2) {
+			return false;
+		}
+		if (!BuildingsManager.areAllMilitaryBuildingsProducing()) {
+			return false;
+		}
+		if (BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Barracks) > 2) {
+			return false;
+		}
+		if (BaseManager.GetTotalAmountOfCommandCenters() < 3 && BuildingsManager.BarracksCount < BaseManager.GetTotalAmountOfCommandCenters() * 2.5) {
+			return true;
+		}else if (BaseManager.GetTotalAmountOfCommandCenters() >= 3) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override

@@ -94,7 +94,7 @@ public class Building {
 		if (_buildingReservedPosition != null) {			
 			if (ResourcesManager.MineralsPerMinute > 0) {
 				long travelTimeInSeconds = (Math.round(_builder.unit.getPosition().getDistance(_buildingReservedPosition.tilePositionTopLeft.toPosition())) / Math.round(_builder.unit.getType().topSpeed() * 10));
-				DrawingHelper.drawTextOnScreen("Seconds taken to get to building position - " + travelTimeInSeconds);
+				//DrawingHelper.drawTextOnScreen("Seconds taken to get to building position - " + travelTimeInSeconds);
 				int currentMineralsIncludingBuildingCost = 0;
 				if (_buildingType == UnitType.Terran_Supply_Depot) {
 					currentMineralsIncludingBuildingCost = ResourcesManager.getCurrentMinerals();
@@ -105,7 +105,7 @@ public class Building {
 					currentMineralsIncludingBuildingCost += _buildingType.mineralPrice();
 				}
 				int secondLeftUntilWeCanAffordBuilding = (_buildingType.mineralPrice() - currentMineralsIncludingBuildingCost) / (ResourcesManager.MineralsPerMinute / 60);
-				DrawingHelper.drawTextOnScreen("Seconds until we can afford building - " + secondLeftUntilWeCanAffordBuilding);	
+				//DrawingHelper.drawTextOnScreen("Seconds until we can afford building - " + secondLeftUntilWeCanAffordBuilding);	
 				if (secondLeftUntilWeCanAffordBuilding - travelTimeInSeconds <= 0) {
 					// start construction of building early to account for travel time
 					if (_builder.unit.canBuild(_buildingType, _buildingReservedPosition.tilePositionTopLeft)) {

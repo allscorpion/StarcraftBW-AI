@@ -11,7 +11,7 @@ public class Terran_Supply_Depot implements IStructure {
 
 	@Override
 	public boolean RequirementsMetToBuild() {
-		return !BuildingsManager.isBuildingTypeReserved(UnitType.Terran_Supply_Depot)
+		return BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Supply_Depot) == 0
 		&& ResourcesManager.isDepoRequired();
 	}
 
