@@ -315,5 +315,16 @@ public class BaseManager {
 		}
 	}
 	
+	public static int TotalActiveRefinerys(){
+		int totalRefinerys = 0;
+		for (CustomBaseLocation cbl : baseLocations) {
+			if (cbl.commandCenter != null && cbl.commandCenter.hasGasStructure) {
+				totalRefinerys++;
+			}
+		}
+		return totalRefinerys;
+	}
+	
+	
 	
 }

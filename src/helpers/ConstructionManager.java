@@ -79,7 +79,8 @@ public class ConstructionManager {
 	private static void BuildGas() {
     	for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 			if (cbl.commandCenter != null) {
-				if (BuildingsManager.BarracksCount > 1 && cbl.baseLocation.getGeysers().size() > 0 && (BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2) && !cbl.commandCenter.hasGasStructure && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Refinery)) {
+				if (!cbl.commandCenter.hasGasStructure && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Refinery) && BuildingsManager.BarracksCount > 1 && BaseManager.TotalActiveRefinerys() < 1 && cbl.baseLocation.getGeysers().size() > 0 && (WorkersManager.Workers.size() >= 30)) {
+					// BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2
 					cbl.commandCenter.hasGasStructure = true;
 					TilePosition gasPosition = cbl.baseLocation.getGeysers().get(0).getTilePosition();
 					BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(gasPosition), UnitType.Terran_Refinery, gasPosition));
