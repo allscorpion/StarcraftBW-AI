@@ -108,10 +108,10 @@ public class Building {
 				//DrawingHelper.drawTextOnScreen("Seconds until we can afford building - " + secondLeftUntilWeCanAffordBuilding);	
 				if (secondLeftUntilWeCanAffordBuilding - travelTimeInSeconds <= 0) {
 					// start construction of building early to account for travel time
-					Worker w = WorkersManager.GetWorker(_buildingReservedPosition.tilePositionTopLeft);
-					if (w != null) {
-						_builder = w;	
-					}
+//					Worker w = WorkersManager.GetWorker(_buildingReservedPosition.tilePositionTopLeft);
+//					if (w != null) {
+//						_builder = w;	
+//					}
 					if (_builder.unit.canBuild(_buildingType, _buildingReservedPosition.tilePositionTopLeft)) {
 		    			if (_builder.unit.build(_buildingType, _buildingReservedPosition.tilePositionTopLeft)) {
 		    				AddBuildingCosts();
