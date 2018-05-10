@@ -115,7 +115,7 @@ public class UnitsManager{
 					}
 				}
 			}
-			if (!enemyUnit.isVisible() || (!allowUnitsThatCannotAttack && !enemyUnit.canAttack())) continue;
+			if (!enemyUnit.isVisible() || (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack())) continue;
 			int distance = enemyUnit.getDistance(myUnit);
 			if(distance < distanceFromClosestEnemy) {
 				distanceFromClosestEnemy = distance;
