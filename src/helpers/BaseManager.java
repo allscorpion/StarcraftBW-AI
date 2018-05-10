@@ -297,8 +297,9 @@ public class BaseManager {
 	
 	public static void TransferWorkersToRefinery(){
 		for (CustomBaseLocation cbl : baseLocations) {
-			if (cbl.commandCenter != null && cbl.commandCenter.gasStructure != null && SelectAllGasWorkersAssignedToCommandCenter(cbl).size() < 3) {
-				List<Worker> refineryWorkers = new ArrayList<Worker>();
+			if (cbl.commandCenter != null && cbl.commandCenter.gasStructure != null) {
+				List<Worker> refineryWorkers = SelectAllGasWorkersAssignedToCommandCenter(cbl);
+				if (refineryWorkers.size() >= 3) continue;
 				List<Worker> ccWorkers = SelectAllMineralWorkersAssignedToCommandCenter(cbl);
 				if (ccWorkers.size() > 0) {
 					for (Worker w : ccWorkers) {
@@ -308,7 +309,7 @@ public class BaseManager {
 								 refineryWorker.miningFrom = cbl.commandCenter.gasStructure;
 								 refineryWorker.unit.gather(cbl.commandCenter.gasStructure);
 							}
-							return;
+							break;
 						}
 					}
 				}
