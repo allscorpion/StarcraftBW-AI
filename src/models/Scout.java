@@ -3,6 +3,7 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
+import bwapi.Position;
 import bwapi.TilePosition;
 import bwapi.Unit;
 
@@ -11,5 +12,5 @@ public class Scout {
 		unit = u;
 	}
 	public Unit unit;
-	public List<TilePosition> scoutedLocations = new ArrayList<TilePosition>();
+	public Position currentTarget;
 }

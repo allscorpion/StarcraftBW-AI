@@ -17,6 +17,7 @@ import helpers.BaseManager;
 import helpers.BuildingsManager;
 import helpers.ConstructionManager;
 import helpers.DrawingHelper;
+import helpers.EnemyManager;
 import helpers.MapAnalyser;
 import helpers.MiningHelper;
 import helpers.PathingManager;
@@ -54,7 +55,7 @@ public class start extends DefaultBWListener {
         BWTA.analyze();
         
         Commander.Init();
-        
+        StarCraftInstance.game.setRevealAll(true);
         //System.out.println("Map data ready");
         //int i = 0;
         
@@ -132,6 +133,7 @@ public class start extends DefaultBWListener {
     	BuildingsManager.buildingDestroyed(unit);
     	WorkersManager.onWorkerDestroy(unit);
     	UnitsManager.onUnitDestroy(unit);
+    	ScoutsManager.ScoutKilled(unit);
     }
     
     @Override
@@ -165,7 +167,7 @@ public class start extends DefaultBWListener {
     	DrawingHelper.drawTextOnScreen("Income Per Second - Minerals: " + ResourcesManager.MineralsPerMinute / 60);
     	DrawingHelper.drawTextOnScreen("Game time " + StarCraftInstance.game.elapsedTime() / 60 + ":" + (StarCraftInstance.game.elapsedTime() % 60 < 10 ? "0": "") + StarCraftInstance.game.elapsedTime() % 60);
     	DrawingHelper.drawTextOnScreen("Frames " + StarCraftInstance.game.getFrameCount());
-        DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + BuildingsManager.enemyBuildingMemory.size());
+        DrawingHelper.drawTextOnScreen("Amount of enemy buildings scouted " + EnemyManager.enemyBuildingMemory.size());
         
         
 //        drawTextOnScreen("Command Centers " + CommandCenters.size());
@@ -265,7 +267,7 @@ public class start extends DefaultBWListener {
     	//storeEnemyBuidlings();
     	
     	WorkersManager.SendIdleWorkersToMinerals();
-    	BuildingsManager.storeEnemyBuidlings();
+    	EnemyManager.storeEnemyBuidlings();
     	//BaseManager.TransferAdditionalWorkersToFreeBase();
     	//DrawingHelper.drawTextOnScreen("shouldBuildDepo " + String.valueOf(ResourcesManager.isDepoRequired()));
     	//build depos
@@ -287,14 +289,15 @@ public class start extends DefaultBWListener {
     }
     
     private boolean isMyUnit (Unit unit) {
-    	boolean isMyUnit = false;
-    	for (Unit u : StarCraftInstance.self.getUnits()) {
-    		if (u.getID() == unit.getID()) {
-    			isMyUnit = true;
-    			break;
-    		}
-    	}
-    	return isMyUnit;
+    	return unit.getPlayer().getID() == StarCraftInstance.self.getID();
+//    	boolean isMyUnit = false;
+//    	for (Unit u : StarCraftInstance.self.getUnits()) {
+//    		if (u.getID() == unit.getID()) {
+//    			isMyUnit = true;
+//    			break;
+//    		}
+//    	}
+//    	return isMyUnit;
     }
     
     @Override

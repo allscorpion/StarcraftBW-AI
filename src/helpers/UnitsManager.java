@@ -168,10 +168,10 @@ public class UnitsManager{
     	}
 		
 		if (StarCraftInstance.self.allUnitCount(UnitType.Terran_Marine) >= 50) {
-			if (BuildingsManager.enemyBuildingMemory.size() > 0) {
+			if (EnemyManager.enemyBuildingMemory.size() > 0) {
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {
-    					for (Position enemyBuildingPosition : BuildingsManager.enemyBuildingMemory) {
+    					for (Position enemyBuildingPosition : EnemyManager.enemyBuildingMemory) {
     						mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
         					mu.unit.attack(enemyBuildingPosition);
     					}

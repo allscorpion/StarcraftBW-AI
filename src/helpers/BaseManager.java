@@ -15,17 +15,18 @@ import bwta.BaseLocation;
 import models.Building;
 import models.CommandCenter;
 import models.CustomBaseLocation;
+import models.SpawnLocation;
 import models.Worker;
 
 public class BaseManager {
 	public static void Init() {
 		mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
 		baseLocations = new ArrayList<CustomBaseLocation>();
-		spawnLocations = new ArrayList<BaseLocation>();
+		spawnLocations = new ArrayList<SpawnLocation>();
 		for (BaseLocation bl : BWTA.getBaseLocations()) {
 			baseLocations.add(new CustomBaseLocation(bl));	
-			if (bl.isStartLocation() && bl.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
-				spawnLocations.add(bl);
+			if (bl.isStartLocation()) {
+				spawnLocations.add(new SpawnLocation(bl, bl.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) <= 0));
 			}
 		}
 	}
@@ -34,7 +35,7 @@ public class BaseManager {
 	
 	public static List<CustomBaseLocation> baseLocations;
 	
-	public static List<BaseLocation> spawnLocations;
+	public static List<SpawnLocation> spawnLocations;
 	
 	private static double amountOfWorkersPerMineral = 2.5;
 	

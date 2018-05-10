@@ -33,7 +33,6 @@ public class BuildingsManager {
 	    MilitaryBuildings = new ArrayList<Unit>();
 	    InaccessibleChokepoints = new ArrayList<Chokepoint>();
 	    BarracksCount = 0;
-	    enemyBuildingMemory = new HashSet<Position>();
 	}
 	
     public static HashSet<ReservedTile> ReservedTiles;
@@ -42,7 +41,7 @@ public class BuildingsManager {
     public static List<Unit> MilitaryBuildings;
     public static List<Chokepoint> InaccessibleChokepoints;
     public static int BarracksCount;
-    public static HashSet<Position> enemyBuildingMemory;
+    
     public static void buildingCreated(Unit unit) {
     	if (unit.getType().isBuilding()) {
     		if (unit.getType() == UnitType.Terran_Supply_Depot) {
@@ -356,58 +355,6 @@ public class BuildingsManager {
             }
         });
 		return baseChokepoints.get(0);
-	}
-	
-	public static void storeEnemyBuidlings() {
-	//always loop over all currently visible enemy units (even though this set is usually empty)
-		for (Unit u : StarCraftInstance.game.enemy().getUnits()) {
-			//if this unit is in fact a building
-			if (u.getType().isBuilding()) {
-				//check if we have it's position in memory and add it if we don't
-				if (!enemyBuildingMemory.contains(u.getPosition())) enemyBuildingMemory.add(u.getPosition());
-			}
-		}
-	
-		//loop over all the positions that we remember
-		for (final Position p : enemyBuildingMemory) {
-			// compute the TilePosition corresponding to our remembered Position p
-			TilePosition tileCorrespondingToP = new TilePosition(p.getX()/32 , p.getY()/32);
-	
-			//if that tile is currently visible to us...
-			if (StarCraftInstance.game.isVisible(tileCorrespondingToP)) {
-	
-				//loop over all the visible enemy buildings and find out if at least
-				//one of them is still at that remembered position
-				boolean buildingStillThere = false;
-				for (Unit u : StarCraftInstance.game.enemy().getUnits()) {
-					if ((u.getType().isBuilding()) && (u.getPosition().equals(p))) {
-						buildingStillThere = true;
-						break;
-					}
-				}
-	
-				//if there is no more any building, remove that position from our memory
-				if (buildingStillThere == false) {
-					enemyBuildingMemory.remove(p);
-					break;
-				}
-	//			else {
-	//				StarCraftInstance.self.getUnits().stream().filter(new Predicate<Unit>() {
-	//					@Override
-	//					public boolean test(Unit u) {
-	//						return !u.isAttacking();
-	//					}
-	//				}).forEach(new Consumer<Unit>() {
-	//					@Override
-	//					public void accept(Unit attackUnit) {
-	//						if (attackUnit.getType() == UnitType.Terran_Marine) {
-	//							attackUnit.attack(p);
-	//						}
-	//					}
-	//				});
-	//			}
-			}
-		}
 	}
 	
 }
