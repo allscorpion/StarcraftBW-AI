@@ -101,6 +101,33 @@ public class UnitsManager{
 			}
     }
     
+    private static Unit SelectEnemyUnit(Unit myUnit, List<Unit> enemyUnits, boolean allowUnitsThatCannotAttack) {
+    	int distanceFromClosestEnemy = Integer.MAX_VALUE;
+    	Unit selectedEnemyUnit = null;
+    	for (Unit enemyUnit : enemyUnits) {
+			if (enemyUnit.isCloaked() && enemyUnit.canAttack() && myUnit.isInWeaponRange(enemyUnit)) {
+				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
+					if (cbl.commandCenter != null) {
+						if (cbl.commandCenter.unit.getAddon() != null && cbl.commandCenter.unit.getAddon().canUseTech(TechType.Scanner_Sweep, enemyUnit.getPosition())) {
+							cbl.commandCenter.unit.getAddon().useTech(TechType.Scanner_Sweep, enemyUnit.getPosition());
+							break;	
+						}
+					}
+				}
+			}
+			if (!enemyUnit.isVisible() || (!allowUnitsThatCannotAttack && !enemyUnit.canAttack())) continue;
+			int distance = enemyUnit.getDistance(myUnit);
+			if(distance < distanceFromClosestEnemy) {
+				distanceFromClosestEnemy = distance;
+				selectedEnemyUnit = enemyUnit;
+			}
+    	}
+    	if (selectedEnemyUnit == null && allowUnitsThatCannotAttack == false) {
+    		selectedEnemyUnit = SelectEnemyUnit(myUnit, enemyUnits, true);
+    	}
+    	return selectedEnemyUnit; 
+    }
+    
     public static void attackUnits() {
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
     	if (closestEnemyUnits.size() > 0) {
@@ -116,26 +143,7 @@ public class UnitsManager{
 //    			                        ? -1 : 1;
 //    			            }
 //    			        });
-    				Unit closestEnemy = null;
-    				int distanceFromClosestEnemy = Integer.MAX_VALUE;
-    				for (Unit enemyUnit : closestEnemyUnits) {
-    					if (enemyUnit.isCloaked() && mu.unit.isInWeaponRange(enemyUnit)) {
-    						for (CustomBaseLocation cbl : BaseManager.baseLocations) {
-    							if (cbl.commandCenter != null) {
-    								if (cbl.commandCenter.unit.getAddon() != null && cbl.commandCenter.unit.getAddon().canUseTech(TechType.Scanner_Sweep, enemyUnit.getPosition())) {
-    									cbl.commandCenter.unit.getAddon().useTech(TechType.Scanner_Sweep, enemyUnit.getPosition());
-    									break;	
-    								}
-    							}
-    						}
-    					}
-    					if (!enemyUnit.isVisible()) continue;
-    					int distance = enemyUnit.getDistance(mu.unit);
-    					if(distance < distanceFromClosestEnemy) {
-    						distanceFromClosestEnemy = distance;
-    						closestEnemy = enemyUnit;
-    					}
-    		    	}
+    				Unit closestEnemy = SelectEnemyUnit(mu.unit, closestEnemyUnits, false);
     				if(closestEnemy == null) continue;
     				if (closestEnemy.getDistance(mu.unit) > 1000) continue;
     				MarineUseStim(mu.unit, closestEnemy);
@@ -152,8 +160,8 @@ public class UnitsManager{
 //    							)
 //    					)
 //    				);
-    				if (mu.unit.isIdle() && !closestEnemy.isCloaked()) {
-    					mu.unit.attack(closestEnemy.getPosition());
+    				if (mu.unit.isIdle() || (mu.unit.getOrderTarget() == null || (mu.unit.getOrderTarget().getID() != closestEnemy.getID() && !closestEnemy.isCloaked()))) {
+    					mu.unit.attack(closestEnemy);
     				}
 //    				if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
 //    					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
@@ -166,14 +174,14 @@ public class UnitsManager{
     			//}
     		} 
     	}
-		
-		if (StarCraftInstance.self.allUnitCount(UnitType.Terran_Marine) >= 50) {
+		DrawingHelper.drawTextOnScreen(UnitsManager.MilitaryUnits.size() + "");
+		if (UnitsManager.MilitaryUnits.size() >= 50) {
 			if (EnemyManager.enemyBuildingMemory.size() > 0) {
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {
     					for (Position enemyBuildingPosition : EnemyManager.enemyBuildingMemory) {
     						mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
-        					mu.unit.attack(enemyBuildingPosition);
+        					mu.unit.attack(enemyBuildingPosition.makeValid());
     					}
 	    			}
 	    		}
@@ -184,7 +192,7 @@ public class UnitsManager{
 	            			// If this is a possible start location,
 	            			if (cbl.baseLocation.getTilePosition().getDistance(mu.unit.getTilePosition()) > 400 && cbl.baseLocation.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
 	            				mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
-	        					mu.unit.attack(cbl.baseLocation.getPosition());
+	        					mu.unit.attack(cbl.baseLocation.getPosition().makeValid());
 	            			}
 	            		}
 	    			}
