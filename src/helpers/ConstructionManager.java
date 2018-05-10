@@ -27,7 +27,7 @@ public class ConstructionManager {
 			BuildGas();
 			ConstructBuilding(UnitType.Terran_Academy);
 			BuildBarracksUnit();
-			//BuildBase();
+			BuildBase();
 			ConstructBuilding(UnitType.Terran_Barracks);	
 		}
 	}
@@ -45,6 +45,7 @@ public class ConstructionManager {
 			CacheStructure cs = GetCacheStructure(buildingType);
 			if (cs != null) {
 				CheckStructure(cs.structureClass, buildingType);
+				return;
 			}
 			Class<?> structureClass = Class.forName("structures." + buildingType.toString());
 			IStructure structure = (IStructure)structureClass.newInstance();

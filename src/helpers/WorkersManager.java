@@ -64,6 +64,7 @@ public class WorkersManager {
 				!w.isScout && 
 				!w.unit.isCarryingGas() && 
 				!w.unit.isCarryingMinerals() && 
+				w.miningFrom != null &&
 				!(w.miningFrom != null && w.miningFrom.getType() == UnitType.Terran_Refinery);
     }
     
@@ -86,6 +87,15 @@ public class WorkersManager {
 			}
 		}	
     	return closestWorker;
+    }
+    
+    public static void RemoveMineralFromWorkers(Unit mineral) {
+    	for (Worker w : Workers) {
+    		if (w.miningFrom != null && w.miningFrom.getID() == mineral.getID()) {
+    			w.miningFrom = null;
+    			w.unit.stop();
+    		}
+    	}
     }
     
     public static void SendIdleWorkersToMinerals() {

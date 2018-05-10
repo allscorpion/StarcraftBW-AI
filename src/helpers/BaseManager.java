@@ -88,10 +88,20 @@ public class BaseManager {
 		return mineralWorkers + gasWorkers;
 	}
 	
+	public static void SetBaseStartedToMineOut(Unit mineral) {
+		if (!mineral.getType().isMineralField()) return;
+		for (CustomBaseLocation cbl : baseLocations) {
+			if (cbl.commandCenter != null && cbl.baseLocation.getStaticMinerals().contains(mineral)) {
+				cbl.commandCenter.isMineralFieldStartedToDeplete = true;
+				break;
+			}
+		}
+	}
+	
 	public static int GetTotalAmountOfCommandCenters() {
 		int total = 0;
 		for (CustomBaseLocation cbl : baseLocations) {
-			if (cbl.commandCenter != null) {
+			if (cbl.commandCenter != null && !cbl.commandCenter.isMineralFieldStartedToDeplete) {
 				total++;
 			}
 		}
@@ -100,7 +110,7 @@ public class BaseManager {
 	
 	public static void AllowOversaturationForAllCommandCenters() {
 		for (CustomBaseLocation cbl : baseLocations) {
-			if (cbl.commandCenter != null) {
+			if (cbl.commandCenter != null && !cbl.commandCenter.isMineralFieldStartedToDeplete) {
 				cbl.commandCenter.allowOversaturation = true;
 			}
 		}
@@ -108,7 +118,7 @@ public class BaseManager {
 	
 	public static void DisallowOversaturationForAllCommandCenters() {
 		for (CustomBaseLocation cbl : baseLocations) {
-			if (cbl.commandCenter != null) {
+			if (cbl.commandCenter != null && !cbl.commandCenter.isMineralFieldStartedToDeplete) {
 				cbl.commandCenter.allowOversaturation = false;
 			}
 		}
@@ -151,14 +161,21 @@ public class BaseManager {
 	
 	public static CustomBaseLocation GetBaseThatHasFreeSpaceForWorkers(final Unit myUnit) {
 		List<CustomBaseLocation> cbls = SortBasesByDistanceToUnit(myUnit);
+		CustomBaseLocation freeBase = null;
+		boolean aBaseAllowedOverSaturation = false;
 		for (CustomBaseLocation cbl : cbls) {
 			if (cbl.commandCenter != null) {
+				if (!aBaseAllowedOverSaturation && cbl.commandCenter.allowOversaturation) aBaseAllowedOverSaturation = true;
 				if (cbl.commandCenter.allowOversaturation || !IsBaseFullySaturated(cbl)) {
 					return cbl;
 				}
 			}
 		}
-		return null;
+		if (freeBase == null && !aBaseAllowedOverSaturation) {
+			AllowOversaturationForAllCommandCenters();
+			freeBase = GetBaseThatHasFreeSpaceForWorkers(myUnit);
+		}
+		return freeBase;
 	}
 	
 	public static void TransferAdditionalWorkersToFreeBase() {
@@ -245,24 +262,56 @@ public class BaseManager {
 		return workers;
 	}
 	
-	public static void TransferWorkersToRefinery(Unit refinery){
-		List<CustomBaseLocation> cbls = SortBasesByDistanceToUnit(refinery);
-		List<Worker> refineryWorkers = new ArrayList<Worker>();
-		for (CustomBaseLocation cbl : cbls) {
+	public static void AssignGasToCommandCenter(Unit geyser){
+		for (CustomBaseLocation cbl : baseLocations) {
 			if (cbl.commandCenter != null) {
+				for (Unit baseGeyser : cbl.baseLocation.getGeysers()) {
+					if (geyser.getID() == baseGeyser.getID()) {
+						cbl.commandCenter.gasStructure = geyser;
+						return;
+					}	
+				}
+			}
+		}
+	}
+	
+	public static void RemoveGasFromCommandCenter(Unit geyser){
+		for (CustomBaseLocation cbl : baseLocations) {
+			if (cbl.commandCenter != null) {
+				for (Unit baseGeyser : cbl.baseLocation.getGeysers()) {
+					if (geyser.getID() == baseGeyser.getID()) {
+						cbl.commandCenter.gasStructure = null;
+						for (Worker w : WorkersManager.Workers) {
+							if (w.miningFrom.getID() == geyser.getID()) {
+								w.miningFrom = null;
+								w.unit.stop();
+							}
+						}
+						return;
+					}	
+				}
+			}
+		}
+	}
+	
+	public static void TransferWorkersToRefinery(){
+		for (CustomBaseLocation cbl : baseLocations) {
+			if (cbl.commandCenter != null && cbl.commandCenter.gasStructure != null && SelectAllGasWorkersAssignedToCommandCenter(cbl).size() < 3) {
+				List<Worker> refineryWorkers = new ArrayList<Worker>();
 				List<Worker> ccWorkers = SelectAllMineralWorkersAssignedToCommandCenter(cbl);
 				if (ccWorkers.size() > 0) {
 					for (Worker w : ccWorkers) {
 						refineryWorkers.add(w);
-						if (refineryWorkers.size() == 3) break;
+						if (refineryWorkers.size() == 3) {
+							 for (Worker refineryWorker : refineryWorkers) {
+								 refineryWorker.miningFrom = cbl.commandCenter.gasStructure;
+								 refineryWorker.unit.gather(cbl.commandCenter.gasStructure);
+							}
+							return;
+						}
 					}
 				}
 			}
-			if (refineryWorkers.size() == 3) break;
-		}
-		for (Worker w : refineryWorkers) {
-			w.miningFrom = refinery;
-			w.unit.gather(refinery);
 		}
 	}
 	

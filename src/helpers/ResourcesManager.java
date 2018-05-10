@@ -10,14 +10,12 @@ public class ResourcesManager {
 
 	public static void Init() {
 		MineralsInReserve = 0;
-	    MilitaryMineralUnitCost = 0;
         PotentialSupply = StarCraftInstance.self.supplyTotal();
         MineralsPerMinute = 0;
         GasPerFrame = 0;
     }
 	
     public static int MineralsInReserve;
-    public static int MilitaryMineralUnitCost;
     public static int PotentialSupply;
     public static int MineralsPerMinute;
     public static int GasPerFrame;

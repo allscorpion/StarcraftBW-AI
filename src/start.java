@@ -125,7 +125,8 @@ public class start extends DefaultBWListener {
     @Override
     public void onUnitDestroy(Unit unit) {
     	if (unit.getType() == UnitType.Resource_Mineral_Field) {
-    		boolean test = true;
+    		WorkersManager.RemoveMineralFromWorkers(unit);
+    		BaseManager.SetBaseStartedToMineOut(unit);
     	}
     	if (!StarCraftInstance.allMyUnits.contains(unit)) return;
     	StarCraftInstance.allMyUnits.remove(unit);
@@ -267,6 +268,7 @@ public class start extends DefaultBWListener {
     	
     	WorkersManager.SendIdleWorkersToMinerals();
     	EnemyManager.storeEnemyBuidlings();
+    	BaseManager.TransferWorkersToRefinery();
     	//BaseManager.TransferAdditionalWorkersToFreeBase();
     	//DrawingHelper.drawTextOnScreen("shouldBuildDepo " + String.valueOf(ResourcesManager.isDepoRequired()));
     	//build depos

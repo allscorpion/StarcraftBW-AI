@@ -61,6 +61,7 @@ public class BuildingsManager {
         		}
         	}
         	else if (unit.getType() == UnitType.Terran_Barracks) {
+        		BarracksCount++;
         		MilitaryBuildings.add(unit);
     		}
     		if (!unit.getType().isAddon()) {
@@ -85,21 +86,19 @@ public class BuildingsManager {
 	    		if (BuildingsUnderConstruction.size() > 0) {
 	    			Building constructingBuilding = GetBuildingFromUnit(unit);
 	        		if (constructingBuilding == null) {
-	        			StarCraftInstance.game.printf("Unable to find building");
+	        			StarCraftInstance.game.printf("Unable to find building");	 
 	        		}else {
 	        			constructingBuilding._structure = null;
-	        			if (unit.getType() == UnitType.Terran_Supply_Depot) {
-	            			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
-	            		} else if (unit.getType() == UnitType.Terran_Command_Center) { 
-	            			ResourcesManager.PotentialSupply -= UnitType.Terran_Command_Center.supplyProvided();
-	            		}
 	        		}
 	    		}
+    		}
+    		if (unit.getType().supplyProvided() > 0) {
+    			ResourcesManager.PotentialSupply -= unit.getType().supplyProvided();
     		}
     		if (unit.getType() == UnitType.Terran_Academy) {
     			Academy = null;
     		}
-    		if (unit.getType() == UnitType.Terran_Command_Center) {
+    		else if (unit.getType() == UnitType.Terran_Command_Center) {
     			CustomBaseLocation cbl = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
         		if (cbl != null) {
         			cbl.commandCenter = null;
@@ -109,11 +108,10 @@ public class BuildingsManager {
         	}
         	else if (unit.getType() == UnitType.Terran_Barracks) {
         		MilitaryBuildings.remove(unit);
-        		ResourcesManager.MilitaryMineralUnitCost -= 50;
         		BarracksCount--;
-    		} else if (unit.getType() == UnitType.Terran_Supply_Depot) {
-    			ResourcesManager.PotentialSupply -= UnitType.Terran_Supply_Depot.supplyProvided();
-    		}
+    		}else if (unit.getType() == UnitType.Terran_Refinery) {
+    			BaseManager.RemoveGasFromCommandCenter(unit);
+        	}
     	}
     }
     
@@ -129,7 +127,8 @@ public class BuildingsManager {
         		}
         	}
     		else if (unit.getType() == UnitType.Terran_Refinery) {
-    			BaseManager.TransferWorkersToRefinery(unit);
+    			BaseManager.AssignGasToCommandCenter(unit);
+    			BaseManager.TransferWorkersToRefinery();
         	}
     		if (!unit.getType().isAddon()) {
 	    		if (BuildingsUnderConstruction.size() > 0) {

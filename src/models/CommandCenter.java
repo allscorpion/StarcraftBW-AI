@@ -10,5 +10,7 @@ public class CommandCenter {
 	}
 	public Unit unit;
 	public boolean hasGasStructure;
+	public Unit gasStructure;
 	public boolean allowOversaturation;
+	public boolean isMineralFieldStartedToDeplete;
 }

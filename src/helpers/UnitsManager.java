@@ -116,6 +116,9 @@ public class UnitsManager{
 						}
 					}
 				}
+				// if we used a scan to see a cloaked unit, make sure we prioritize it
+				if (!enemyUnit.isCloaked()) return enemyUnit;
+				
 			}
 			if (enemyUnit.isCloaked() || (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack())) continue;
 			int distance = enemyUnit.getDistance(myUnit);
@@ -162,7 +165,7 @@ public class UnitsManager{
 //    							)
 //    					)
 //    				);
-    				if (mu.unit.isIdle() || (mu.unit.getOrderTarget() == null || (mu.unit.getOrderTarget().getID() != closestEnemy.getID() && !closestEnemy.isCloaked()))) {
+    				if (mu.unit.isIdle() || (mu.unit.getOrderTarget() == null || (mu.unit.getOrderTarget().getID() != closestEnemy.getID()))) {
     					mu.AttackUnit(closestEnemy);
     				}
 //    				if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
