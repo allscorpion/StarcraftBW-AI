@@ -24,10 +24,12 @@ public class UnitsManager{
 	public static void Init() {
 		MilitaryUnits = new ArrayList<MilitaryUnit>();
 		Medics = new ArrayList<MilitaryUnit>();
+		attackedBaseLocations = new ArrayList<CustomBaseLocation>();
 	}
 	
     public static List<MilitaryUnit> MilitaryUnits;
     public static List<MilitaryUnit> Medics;
+    public static List<CustomBaseLocation> attackedBaseLocations;
     public static void onUnitDestroy(Unit unit) {
     	if (unit.getType() == UnitType.Terran_Marine || unit.getType() == UnitType.Terran_Medic) {
     		if (MilitaryUnits.size() > 0) {
@@ -105,7 +107,7 @@ public class UnitsManager{
     	int distanceFromClosestEnemy = Integer.MAX_VALUE;
     	Unit selectedEnemyUnit = null;
     	for (Unit enemyUnit : enemyUnits) {
-			if (enemyUnit.isCloaked() && enemyUnit.canAttack() && myUnit.isInWeaponRange(enemyUnit)) {
+			if (enemyUnit.isCloaked() && myUnit.isInWeaponRange(enemyUnit)) {
 				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 					if (cbl.commandCenter != null) {
 						if (cbl.commandCenter.unit.getAddon() != null && cbl.commandCenter.unit.getAddon().canUseTech(TechType.Scanner_Sweep, enemyUnit.getPosition())) {
@@ -115,7 +117,7 @@ public class UnitsManager{
 					}
 				}
 			}
-			if (!enemyUnit.isVisible() || (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack())) continue;
+			if (enemyUnit.isCloaked() || (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack())) continue;
 			int distance = enemyUnit.getDistance(myUnit);
 			if(distance < distanceFromClosestEnemy) {
 				distanceFromClosestEnemy = distance;
@@ -161,7 +163,7 @@ public class UnitsManager{
 //    					)
 //    				);
     				if (mu.unit.isIdle() || (mu.unit.getOrderTarget() == null || (mu.unit.getOrderTarget().getID() != closestEnemy.getID() && !closestEnemy.isCloaked()))) {
-    					mu.unit.attack(closestEnemy);
+    					mu.AttackUnit(closestEnemy);
     				}
 //    				if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
 //    					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
@@ -180,19 +182,23 @@ public class UnitsManager{
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {
     					for (Position enemyBuildingPosition : EnemyManager.enemyBuildingMemory) {
-    						mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
-        					mu.unit.attack(enemyBuildingPosition.makeValid());
+    						mu.AttackPosition(enemyBuildingPosition.makeValid());
     					}
 	    			}
 	    		}
 			}else {
+				if (attackedBaseLocations.size() == BaseManager.baseLocations.size()) {
+					// reset attacked base locations as we've attacked them all
+					attackedBaseLocations = new ArrayList<CustomBaseLocation>();
+				}
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {
 	    				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 	            			// If this is a possible start location,
-	            			if (cbl.baseLocation.getTilePosition().getDistance(mu.unit.getTilePosition()) > 400 && cbl.baseLocation.getTilePosition().getDistance(StarCraftInstance.self.getStartLocation()) > 0) {
-	            				mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
-	        					mu.unit.attack(cbl.baseLocation.getPosition().makeValid());
+	            			if (!attackedBaseLocations.contains(cbl) && cbl.commandCenter == null && !StarCraftInstance.game.isVisible(cbl.baseLocation.getTilePosition())) {
+	        					mu.AttackPosition(cbl.baseLocation.getPosition().makeValid());
+	        					attackedBaseLocations.add(cbl);
+	        					break;
 	            			}
 	            		}
 	    			}

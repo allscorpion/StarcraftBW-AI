@@ -67,7 +67,7 @@ public class ConstructionManager {
     			}
     			// keep constant scv production if we can afford it
     			else if (CheckIfWeHaveResourcesToBuild(UnitType.Terran_SCV)) {
-    				if (cbl.commandCenter.unit.getTrainingQueue().size() < 2 && WorkersManager.Workers.size() < BaseManager.TotalWorkersAllCommandCenters() - BaseManager.GetTotalAmountOfCommandCenters()) {
+    				if (cbl.commandCenter.unit.getTrainingQueue().size() < 2 && WorkersManager.Workers.size() < BaseManager.TotalWorkersAllCommandCenters() - cbl.commandCenter.unit.getTrainingQueue().size()) {
     					cbl.commandCenter.unit.train(UnitType.Terran_SCV);
     				}
                 }

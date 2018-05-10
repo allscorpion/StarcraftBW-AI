@@ -55,7 +55,6 @@ public class start extends DefaultBWListener {
         BWTA.analyze();
         
         Commander.Init();
-        StarCraftInstance.game.setRevealAll(true);
         //System.out.println("Map data ready");
         //int i = 0;
         
