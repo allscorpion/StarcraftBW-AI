@@ -113,13 +113,17 @@ public class ConstructionManager {
 	}
 	
 	private static void BuildBarracksUnit() {
+		int totalMarines = StarCraftInstance.self.allUnitCount(UnitType.Terran_Marine);
+		int totalMedics = StarCraftInstance.self.allUnitCount(UnitType.Terran_Medic);
 		for (Unit myUnit : BuildingsManager.MilitaryBuildings) {
 			if (myUnit.getType() == UnitType.Terran_Barracks) {
-				if (UnitsManager.MilitaryUnits.size() % 4 == 0 && myUnit.canTrain(UnitType.Terran_Medic) && myUnit.getTrainingQueue().size() < 1 && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Medic)) {
+				if ((totalMarines % 4 == 0 && totalMarines / 4 > totalMedics) && myUnit.canTrain(UnitType.Terran_Medic) && myUnit.getTrainingQueue().size() < 1 && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Medic)) {
 		            myUnit.train(UnitType.Terran_Medic);
+		            totalMedics++;
 		        }
 				else if (myUnit.getTrainingQueue().size() < 1 && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Marine)) {
 		            myUnit.train(UnitType.Terran_Marine);
+		            totalMarines++;
 		        }
 			}
 		}
