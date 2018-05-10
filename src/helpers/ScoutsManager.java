@@ -41,14 +41,16 @@ public class ScoutsManager {
 	}
 	
 	public static void ScoutEnemyBase() {
+		EnemyManager.storeEnemySpawn();
 		if (EnemyManager.enemySpawn != null) {
 			ScoutEnemyBasePerimeter();
 			return;
 		}
 		for (Scout scout : scouts) {
-			EnemyManager.storeEnemySpawn();
-			if (EnemyManager.enemySpawn != null) return;
 			if (scout.unit.isIdle()) {
+				if (scout.currentTarget != null && scout.unit.getTilePosition().getDistance(scout.currentTarget) <= 10) {
+					scoutedLocations.add(scout.currentTarget);
+				}
 				SpawnLocation closestSpawn = null;
 				double closestSpawnDistance = Integer.MAX_VALUE;
 				for (SpawnLocation sl : BaseManager.spawnLocations) {
@@ -62,11 +64,9 @@ public class ScoutsManager {
 				}	
 				if (closestSpawn != null) {
 					Position ct = closestSpawn.baseLocation.getPosition();
-					scout.currentTarget = ct;
-					scout.unit.move(ct);	
-					scoutedLocations.add(closestSpawn.baseLocation.getTilePosition());
+					scout.currentTarget = closestSpawn.baseLocation.getTilePosition();
+					scout.unit.move(ct);
 				}
-			
 			}
 		}
 	}
@@ -80,10 +80,10 @@ public class ScoutsManager {
 		}
 			
 		for (Scout scout : scouts) {
-			if (scout.unit.isIdle()) {
+			if (scout.unit.isIdle() || (scout.currentTarget != null && scout.currentTarget.getDistance(scout.unit.getTilePosition()) <= 10)) {
 				for (Position p : enemySpawnPerimeter) {
 					if (enemyPerimeterScouted.contains(p)) continue;
-					scout.currentTarget = p;
+					scout.currentTarget = p.toTilePosition();
 					scout.unit.move(p);
 					enemyPerimeterScouted.add(p);
 					break;

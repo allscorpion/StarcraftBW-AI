@@ -2,6 +2,7 @@ package helpers;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import bwapi.Position;
 import bwapi.TilePosition;
@@ -73,7 +74,8 @@ public class EnemyManager {
 		if (enemySpawn == null) {
 			for (SpawnLocation sl : BaseManager.spawnLocations) {
 				if (sl.isMySpawn) continue;
-				if (StarCraftInstance.game.getUnitsOnTile(sl.baseLocation.getTilePosition()).size() > 0) {
+				List<Unit> unitsOnSpawn = StarCraftInstance.game.getUnitsOnTile(sl.baseLocation.getTilePosition());
+				if (unitsOnSpawn.size() > 0 && unitsOnSpawn.get(0).getType().isBuilding()) {
 					sl.isEnemySpawn = true;
 					enemySpawn = sl;
 					return;

@@ -12,5 +12,5 @@ public class Scout {
 		unit = u;
 	}
 	public Unit unit;
-	public Position currentTarget;
+	public TilePosition currentTarget;
 }
