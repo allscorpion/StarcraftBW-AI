@@ -64,6 +64,7 @@ public class start extends DefaultBWListener {
         //StarCraftInstance.game.sendText("show me the money");
         StarCraftInstance.game.enableFlag(1);
         BaseLocation mySpawn = BaseManager.mySpawn;
+        BaseManager.ReserveCommandCenterAddonSpace();
         for(CustomBaseLocation cbl : BaseManager.baseLocations){
         	// StringBuilder baseText = new StringBuilder(String.valueOf(baseLocation.getGroundDistance(mySpawn)) + "\n");
         	//baseText.append(String.valueOf(baseLocation.getAirDistance(mySpawn)));
@@ -191,7 +192,11 @@ public class start extends DefaultBWListener {
     	//PathingManager.FindPath(BaseManager.mySpawn.getPosition(), new Position(0, 0));
     	
     	for (ReservedTile rt : BuildingsManager.ReservedTiles) {
-    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeft.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Red);
+    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeftWithPadding.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Red);
+    	}
+    	
+    	for (ReservedTile rt : BuildingsManager.CommandCenterReservedTiles) {
+    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeftWithPadding.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Orange);
     	}
     	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {

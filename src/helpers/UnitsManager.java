@@ -107,20 +107,20 @@ public class UnitsManager{
     	int distanceFromClosestEnemy = Integer.MAX_VALUE;
     	Unit selectedEnemyUnit = null;
     	for (Unit enemyUnit : enemyUnits) {
-			if (enemyUnit.isCloaked() && myUnit.isInWeaponRange(enemyUnit)) {
+    		// DETECT IF UNIT IS CLOAKED IN A BETTER WAY
+			if (!enemyUnit.isDetected() && myUnit.isInWeaponRange(enemyUnit)) {
 				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 					if (cbl.commandCenter != null) {
 						if (cbl.commandCenter.unit.getAddon() != null && cbl.commandCenter.unit.getAddon().canUseTech(TechType.Scanner_Sweep, enemyUnit.getPosition())) {
 							cbl.commandCenter.unit.getAddon().useTech(TechType.Scanner_Sweep, enemyUnit.getPosition());
-							break;	
+							return enemyUnit;
 						}
 					}
 				}
 				// if we used a scan to see a cloaked unit, make sure we prioritize it
-				if (!enemyUnit.isCloaked()) return enemyUnit;
 				
 			}
-			if (enemyUnit.isCloaked() || (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack())) continue;
+			if (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack()) continue;
 			int distance = enemyUnit.getDistance(myUnit);
 			if(distance < distanceFromClosestEnemy) {
 				distanceFromClosestEnemy = distance;

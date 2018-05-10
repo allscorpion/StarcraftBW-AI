@@ -10,8 +10,8 @@ import helpers.WorkersManager;
 
 public class Commander {
 	public static void Init() {
-		BaseManager.Init();
 		BuildingsManager.Init();
+		BaseManager.Init();
 		ConstructionManager.Init();
 		MiningHelper.Init();
 		ResourcesManager.Init();

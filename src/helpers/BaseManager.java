@@ -15,12 +15,16 @@ import bwta.BaseLocation;
 import models.Building;
 import models.CommandCenter;
 import models.CustomBaseLocation;
+import models.ReservedTile;
 import models.SpawnLocation;
 import models.Worker;
 
 public class BaseManager {
 	public static void Init() {
 		mySpawn = BWTA.getStartLocation(StarCraftInstance.self);
+		ReservedTile mySpawnTile = new ReservedTile(mySpawn.getTilePosition(), UnitType.Terran_Command_Center);
+		mySpawnTile.isTemp = false;
+		BuildingsManager.ReservedTiles.add(mySpawnTile);
 		baseLocations = new ArrayList<CustomBaseLocation>();
 		spawnLocations = new ArrayList<SpawnLocation>();
 		for (BaseLocation bl : BWTA.getBaseLocations()) {
@@ -137,14 +141,10 @@ public class BaseManager {
 		return totalWorkers;
 	}
 	
-	public static int ReserveCommandCenterAddonSpace() {
-		int totalWorkers = 0;
+	public static void ReserveCommandCenterAddonSpace() {
 		for (CustomBaseLocation cbl : baseLocations) {
-			if (cbl.commandCenter != null) {
-				//BuildingsManager.ReservedTiles.add(new TilePosition(cbl.commandCenter.unit.getTilePosition().getX() + UnitType.Terran_Comsat_Station.tileSize().getX(), cbl.commandCenter.unit.getTilePosition().getY()));
-			}
+			BuildingsManager.CommandCenterReservedTiles.add(new ReservedTile(cbl.baseLocation.getTilePosition(), UnitType.Terran_Command_Center, 3));
 		}
-		return totalWorkers;
 	}
 	
 	public static List<CustomBaseLocation> SortBasesByDistanceToUnit(final Unit myUnit) {
@@ -281,6 +281,7 @@ public class BaseManager {
 				for (Unit baseGeyser : cbl.baseLocation.getGeysers()) {
 					if (geyser.getID() == baseGeyser.getID()) {
 						cbl.commandCenter.gasStructure = null;
+						cbl.commandCenter.hasGasStructure = false;
 						for (Worker w : WorkersManager.Workers) {
 							if (w.miningFrom.getID() == geyser.getID()) {
 								w.miningFrom = null;

@@ -28,14 +28,18 @@ public class BuildingsManager {
 
 	public static void Init() {
 		ReservedTiles = new HashSet<ReservedTile>();
+		CommandCenterReservedTiles = new HashSet<ReservedTile>();
 	    BuildingsUnderConstruction = new ArrayList<Building>();
 	    Academy = null;
 	    MilitaryBuildings = new ArrayList<Unit>();
 	    InaccessibleChokepoints = new ArrayList<Chokepoint>();
 	    BarracksCount = 0;
+	    paddingAroundBuildings = 1;
 	}
 	
+	public static int paddingAroundBuildings;
     public static HashSet<ReservedTile> ReservedTiles;
+    public static HashSet<ReservedTile> CommandCenterReservedTiles;
     public static List<Building> BuildingsUnderConstruction;
     public static Unit Academy;
     public static List<Unit> MilitaryBuildings;
@@ -56,7 +60,6 @@ public class BuildingsManager {
         			StarCraftInstance.game.printf("Unable to find custom base location");
         		}else {
         			cbl.commandCenter = new CommandCenter(unit);
-        			BaseManager.ReserveCommandCenterAddonSpace();
         			BaseManager.AllowOversaturationForAllCommandCenters();
         		}
         	}
@@ -82,6 +85,10 @@ public class BuildingsManager {
 
     public static void buildingDestroyed(Unit unit) {
     	if (unit.getType().isBuilding()) {
+    		ReservedTile rt = getTilePosition(unit.getTilePosition(), unit.getType());
+    		if (rt != null) {
+    			ReservedTiles.remove(rt);	
+    		}
     		if (!unit.getType().isAddon()) {
 	    		if (BuildingsUnderConstruction.size() > 0) {
 	    			Building constructingBuilding = GetBuildingFromUnit(unit);
@@ -158,7 +165,7 @@ public class BuildingsManager {
 	 	TilePosition ret = null;
 	 	int maxDist = 3;
 	 	int stopDist = 40;
-	
+	 	int padding = 1;
 	 	// Refinery, Assimilator, Extractor
 	 	if (buildingType.isRefinery()) {
 	 		for (Unit n : StarCraftInstance.game.neutral().getUnits()) {
@@ -178,6 +185,7 @@ public class BuildingsManager {
 	 		for (int i=aroundTile.getX()-maxDist; i<=aroundTile.getX()+maxDist; i++) {
 	 			for (int j=aroundTile.getY()-maxDist; j<=aroundTile.getY()+maxDist; j++) {
 	 				TilePosition availablePosition = new TilePosition(i, j);
+	 				if (buildingType != UnitType.Terran_Command_Center && isCommandCenterTileReserved(availablePosition, buildingType)) continue;
 	 				if (!isTileReserved(availablePosition, buildingType) && StarCraftInstance.game.canBuildHere(availablePosition, buildingType, builder, false)) {
 	 					// units that are blocking the tile
 	 					boolean unitsInWay = false;
@@ -213,7 +221,25 @@ public class BuildingsManager {
 	 	return ret;
 	 }
     
+    public static boolean isCommandCenterTileReserved(TilePosition position, UnitType buildingType) {
+    	ReservedTile testPosition = new ReservedTile(position, buildingType);
+    	for (ReservedTile reservedPosition : CommandCenterReservedTiles) {
+    		if (testPosition.isOverlappingTile(reservedPosition)) {
+    			return true;
+    		}
+		}
+    	return false;
+    }
     
+    public static ReservedTile getTilePosition(TilePosition position, UnitType buildingType) {
+    	ReservedTile testPosition = new ReservedTile(position, buildingType);
+    	for (ReservedTile reservedPosition : ReservedTiles) {
+    		if (testPosition.isOverlappingTile(reservedPosition)) {
+    			return reservedPosition;
+    		}
+		}
+    	return null;
+    }
     
     public static boolean isTileReserved(TilePosition position, UnitType buildingType) {
     	ReservedTile testPosition = new ReservedTile(position, buildingType);
@@ -285,7 +311,7 @@ public class BuildingsManager {
     
     public static void BuildingStartedConstruction(Building building) {
     	ResourcesManager.MineralsInReserve -= building._buildingType.mineralPrice();
-		RemoveBuildingReservedPosition(building);
+		//RemoveBuildingReservedPosition(building);
     }
     
     public static void RemoveBuildingReservedPosition(Building building) {
