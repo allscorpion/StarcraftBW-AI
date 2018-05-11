@@ -103,24 +103,33 @@ public class UnitsManager{
 			}
     }
     
+    private static boolean CanUnitAttack(Unit enemyUnit) {
+    	return enemyUnit.getType().canAttack() || 
+    			enemyUnit.getType().isSpellcaster() || 
+    			enemyUnit.getType() == UnitType.Terran_Dropship || 
+    			enemyUnit.getType() == UnitType.Protoss_Shuttle;
+    }
+    
     private static Unit SelectEnemyUnit(Unit myUnit, List<Unit> enemyUnits, boolean allowUnitsThatCannotAttack) {
     	int distanceFromClosestEnemy = Integer.MAX_VALUE;
     	Unit selectedEnemyUnit = null;
     	for (Unit enemyUnit : enemyUnits) {
-    		// DETECT IF UNIT IS CLOAKED IN A BETTER WAY
+    		if (enemyUnit.isDetected() && enemyUnit.isCloaked()) {
+    			// we just scanned it so focus it
+    			return enemyUnit;
+    		}
 			if (!enemyUnit.isDetected() && myUnit.isInWeaponRange(enemyUnit)) {
 				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 					if (cbl.commandCenter != null) {
 						if (cbl.commandCenter.unit.getAddon() != null && cbl.commandCenter.unit.getAddon().canUseTech(TechType.Scanner_Sweep, enemyUnit.getPosition())) {
 							cbl.commandCenter.unit.getAddon().useTech(TechType.Scanner_Sweep, enemyUnit.getPosition());
+							// if we used a scan to see a cloaked unit, make sure we prioritize it
 							return enemyUnit;
 						}
 					}
 				}
-				// if we used a scan to see a cloaked unit, make sure we prioritize it
-				
 			}
-			if (!allowUnitsThatCannotAttack && !enemyUnit.getType().canAttack()) continue;
+			if (!allowUnitsThatCannotAttack && !CanUnitAttack(enemyUnit)) continue;
 			int distance = enemyUnit.getDistance(myUnit);
 			if(distance < distanceFromClosestEnemy) {
 				distanceFromClosestEnemy = distance;
@@ -180,7 +189,7 @@ public class UnitsManager{
     		} 
     	}
 		DrawingHelper.drawTextOnScreen(UnitsManager.MilitaryUnits.size() + "");
-		if (UnitsManager.MilitaryUnits.size() >= 50) {
+		if (UnitsManager.MilitaryUnits.size() >= 75) {
 			if (EnemyManager.enemyBuildingMemory.size() > 0) {
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {
