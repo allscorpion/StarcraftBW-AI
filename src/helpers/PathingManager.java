@@ -68,7 +68,7 @@ public class PathingManager {
 		return null;
 	}
 	
-	private static Chokepoint GetClosestChokepoint(Chokepoint currentCP, Position p, List<Chokepoint> cps) {
+	public static Chokepoint GetClosestChokepoint(Chokepoint currentCP, Position p, List<Chokepoint> cps) {
 		Chokepoint closestChokepoint = null;
 		if (cps.size() == 1) {
 			closestChokepoint = cps.get(0);
