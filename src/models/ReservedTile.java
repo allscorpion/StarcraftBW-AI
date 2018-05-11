@@ -33,7 +33,7 @@ public class ReservedTile {
 			return false;
 		}
 		else if (testPosition.tilePositionTopLeftWithPadding.getX() - BuildingsManager.paddingAroundBuildings > tilePositionBottomRightWithPadding.getX() + BuildingsManager.paddingAroundBuildings 
-				&& (this.addOn != null && testPosition.tilePositionTopLeft.getX() > this.addOn.tilePositionBottomRight.getX())) {
+				&& (this.addOn != null && testPosition.tilePositionTopLeftWithPadding.getX() - BuildingsManager.paddingAroundBuildings > this.addOn.tilePositionBottomRight.getX())) {
 			return false;
 		}
 		else if (testPosition.tilePositionBottomRightWithPadding.getY() - BuildingsManager.paddingAroundBuildings < tilePositionTopLeftWithPadding.getY() + BuildingsManager.paddingAroundBuildings) {
