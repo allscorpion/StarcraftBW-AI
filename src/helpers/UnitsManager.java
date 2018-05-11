@@ -199,7 +199,14 @@ public class UnitsManager{
 	    			}
 	    		}
 			}else {
-				if (attackedBaseLocations.size() == BaseManager.baseLocations.size()) {
+				int totalAttackableBases = 0;
+				for (CustomBaseLocation cbl : BaseManager.baseLocations) {
+        			// If this is a possible start location,
+        			if (cbl.commandCenter == null && !StarCraftInstance.game.isVisible(cbl.baseLocation.getTilePosition())) {
+        				totalAttackableBases++;
+        			}
+        		}
+				if (attackedBaseLocations.size() >= totalAttackableBases) {
 					// reset attacked base locations as we've attacked them all
 					attackedBaseLocations = new ArrayList<CustomBaseLocation>();
 				}
