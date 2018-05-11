@@ -192,11 +192,11 @@ public class start extends DefaultBWListener {
     	//PathingManager.FindPath(BaseManager.mySpawn.getPosition(), new Position(0, 0));
     	
     	for (ReservedTile rt : BuildingsManager.ReservedTiles) {
-    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeftWithPadding.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Red);
+    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeftWithPadding.toPosition(), rt.tilePositionBottomRightWithPadding.toPosition(), Color.Red);
     	}
     	
     	for (ReservedTile rt : BuildingsManager.CommandCenterReservedTiles) {
-    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeftWithPadding.toPosition(), rt.tilePositionBottomRight.toPosition(), Color.Orange);
+    		StarCraftInstance.game.drawBoxMap(rt.tilePositionTopLeftWithPadding.toPosition(), rt.tilePositionBottomRightWithPadding.toPosition(), Color.Orange);
     	}
     	
     	for (Building b : BuildingsManager.BuildingsUnderConstruction) {
