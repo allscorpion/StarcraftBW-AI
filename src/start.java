@@ -164,6 +164,7 @@ public class start extends DefaultBWListener {
     	StarCraftInstance.game.drawTextScreen(560, 20, "Supply " + StarCraftInstance.self.supplyUsed() / 2 + "/" + ResourcesManager.PotentialSupply / 2);
     	StarCraftInstance.game.drawTextScreen(560, 40, "APM " + StarCraftInstance.game.getAPM());
         //DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
+    	DrawingHelper.drawTextOnScreen("Current playstyle: " + StarCraftInstance.currentPlayStyle);
     	DrawingHelper.drawTextOnScreen("Income Per Minute - Minerals: " + ResourcesManager.MineralsPerMinute);
     	DrawingHelper.drawTextOnScreen("Income Per Second - Minerals: " + ResourcesManager.MineralsPerMinute / 60);
     	DrawingHelper.drawTextOnScreen("Game time " + StarCraftInstance.game.elapsedTime() / 60 + ":" + (StarCraftInstance.game.elapsedTime() % 60 < 10 ? "0": "") + StarCraftInstance.game.elapsedTime() % 60);

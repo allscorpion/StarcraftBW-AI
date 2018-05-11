@@ -10,6 +10,7 @@ import bwapi.Region;
 import bwapi.Unit;
 import bwta.BWTA;
 import bwta.BaseLocation;
+import enums.PlayStyles;
 import models.CustomBaseLocation;
 
 public class StarCraftInstance {
@@ -18,6 +19,7 @@ public class StarCraftInstance {
 		game = mirror.getGame();
         self = game.self();
         allMyUnits = new ArrayList<Unit>();
+        currentPlayStyle = PlayStyles.Greedy;
 	}
 	
 	public static Mirror mirror;
@@ -27,5 +29,7 @@ public class StarCraftInstance {
 	public static Player self;
 	
 	public static List<Unit> allMyUnits;
+	
+	public static PlayStyles currentPlayStyle;
 	
 }

@@ -23,12 +23,32 @@ public class ConstructionManager {
 	public static void StartConstructionQueue() {
 		ConstructBuilding(UnitType.Terran_Supply_Depot);
 		if (!ResourcesManager.isDepoRequired()) {
-			BuildWorker();
-			BuildGas();
-			ConstructBuilding(UnitType.Terran_Academy);
-			BuildBarracksUnit();
-			BuildBase();
-			ConstructBuilding(UnitType.Terran_Barracks);	
+			switch (StarCraftInstance.currentPlayStyle) {
+			case Military:
+				BuildBarracksUnit();
+				ConstructBuilding(UnitType.Terran_Barracks);
+				BuildWorker();
+				BuildGas();
+				ConstructBuilding(UnitType.Terran_Academy);
+				break;
+			case Greedy:
+				BuildWorker();
+				BuildBase();
+				BuildGas();
+				ConstructBuilding(UnitType.Terran_Academy);
+				break;
+			case Balanced:
+				BuildWorker();
+				BuildBarracksUnit();
+				ConstructBuilding(UnitType.Terran_Barracks);
+				BuildGas();
+				ConstructBuilding(UnitType.Terran_Academy);
+				BuildBase();
+				break;
+			default:
+				break;
+			}
+				
 		}
 	}
 	
@@ -79,7 +99,13 @@ public class ConstructionManager {
 	private static void BuildGas() {
     	for (CustomBaseLocation cbl : BaseManager.baseLocations) {
 			if (cbl.commandCenter != null) {
-				if (!cbl.commandCenter.hasGasStructure && CheckIfWeHaveResourcesToBuild(UnitType.Terran_Refinery) && BuildingsManager.BarracksCount > 1 && BaseManager.TotalActiveRefinerys() < 1 && cbl.baseLocation.getGeysers().size() > 0 && (WorkersManager.Workers.size() >= 30)) {
+				//(WorkersManager.Workers.size() >= 30)
+				if (!cbl.commandCenter.hasGasStructure && 
+						CheckIfWeHaveResourcesToBuild(UnitType.Terran_Refinery) && 
+						BuildingsManager.BarracksCount > 1 && 
+						BaseManager.TotalActiveRefinerys() < 1 && 
+						cbl.baseLocation.getGeysers().size() > 0 && 
+						BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl)) {
 					// BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2
 					cbl.commandCenter.hasGasStructure = true;
 					TilePosition gasPosition = cbl.baseLocation.getGeysers().get(0).getTilePosition();

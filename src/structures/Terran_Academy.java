@@ -14,6 +14,7 @@ public class Terran_Academy implements IStructure {
 	@Override
 	public boolean RequirementsMetToBuild() {
 		return  //BaseManager.GetTotalAmountOfCommandCenters() > 1 && 
+				BaseManager.TotalActiveRefinerys() > 0 &&
 				BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Academy) == 0 &&
 				StarCraftInstance.game.canMake(UnitType.Terran_Academy) &&
 				BuildingsManager.Academy == null;

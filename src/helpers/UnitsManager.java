@@ -71,7 +71,6 @@ public class UnitsManager{
 			);
     	}
     	else {
-    		MarineUseStim(myUnit, enemyUnit);
 			if (myUnit.isIdle()) {
 				myUnit.attack(enemyUnit.getPosition());	
 			}
@@ -175,7 +174,13 @@ public class UnitsManager{
 //    					)
 //    				);
     				if (mu.unit.isIdle() || (mu.unit.getOrderTarget() == null || (mu.unit.getOrderTarget().getID() != closestEnemy.getID()))) {
-    					mu.AttackUnit(closestEnemy);
+    					mu.AttackUnit(closestEnemy);	
+//    					if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
+//        					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
+//        					KiteMeleeUnits(mu.unit, closestEnemy);
+//    					}else{
+//    						mu.AttackUnit(closestEnemy);	
+//        				}
     				}
 //    				if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
 //    					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
@@ -189,7 +194,7 @@ public class UnitsManager{
     		} 
     	}
 		DrawingHelper.drawTextOnScreen(UnitsManager.MilitaryUnits.size() + "");
-		if (UnitsManager.MilitaryUnits.size() >= 75) {
+		if (UnitsManager.MilitaryUnits.size() >= 30) {
 			if (EnemyManager.enemyBuildingMemory.size() > 0) {
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {
