@@ -264,10 +264,15 @@ public class BuildingsManager {
     public static void CheckBuildingProgress() {
     	for (Building building : BuildingsUnderConstruction) {
     		if (building._buildingReservedPosition == null) {
-    			BuildingFailedConstruction(building);
+    			BuildingsUnderConstruction.remove(building);
     			break;
     		}
     		building.GetNewBuilderIfRequired();
+    		if (building._builder == null) {
+    			ReservedTiles.remove(building._buildingReservedPosition);
+    			BuildingsUnderConstruction.remove(building);
+    			break;
+    		}
     		if (StarCraftInstance.game.isExplored(building._buildingReservedPosition.tilePositionTopLeft)) {
     			// build failed
     			if (building._builder.unit.canBuild() && !building._builder.unit.isConstructing()) {
@@ -334,6 +339,7 @@ public class BuildingsManager {
     }
     
     public static void BuildingFailedConstruction(Building building) {
+    	
     	BuildingStartedConstruction(building);
     	ResourcesManager.PotentialSupply -= building._buildingType.supplyProvided();
     	BuildingFinishedConstruction(building);
