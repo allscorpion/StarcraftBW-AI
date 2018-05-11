@@ -72,7 +72,7 @@ public class ReservedTile {
         boolean canThisBuildingHaveAddon = building.canBuildAddon();
 
         if (canThisBuildingHaveAddon) {
-        	TilePosition pos = new TilePosition(position.getX() + 4, position.getY() + 1);
+        	TilePosition pos = new TilePosition(position.getX() + buildingType.tileWidth(), position.getY() + (buildingType.tileHeight() / 2));
         	this.addOn = new ReservedTile(pos, UnitType.Terran_Comsat_Station, 0);
             return true;
         }

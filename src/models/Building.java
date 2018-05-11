@@ -47,9 +47,11 @@ public class Building {
 			// get new worker
 			//game.printf("Unable to find worker for " + _buildingType);
 			_builder = WorkersManager.GetWorker(_buildingReservedPosition.tilePositionTopLeft);
-			_builder.isBuilding = true;
-			_builder.miningFrom = null;
-			_isBuilderMoving = false;
+			if (_builder != null) {
+				_builder.isBuilding = true;
+				_builder.miningFrom = null;
+				_isBuilderMoving = false;	
+			}
 		}
 	}
 	public void SetBuildingPosition() {

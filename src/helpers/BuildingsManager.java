@@ -279,6 +279,10 @@ public class BuildingsManager {
     			break;
     		}
     		building.GetNewBuilderIfRequired();
+    		if (building._builder == null) {
+    			BuildingFailedConstruction(building);
+    			break;
+    		}
     		if (StarCraftInstance.game.isExplored(building._buildingReservedPosition.tilePositionTopLeft)) {
     			// build failed
     			if (building._builder.unit.canBuild() && !building._builder.unit.isConstructing()) {
@@ -345,9 +349,16 @@ public class BuildingsManager {
     }
     
     public static void BuildingFailedConstruction(Building building) {
-    	BuildingStartedConstruction(building);
-    	ResourcesManager.PotentialSupply -= building._buildingType.supplyProvided();
-    	BuildingFinishedConstruction(building);
+    	if (building._buildingReservedPosition != null) {
+    		ReservedTiles.remove(building._buildingReservedPosition);    		
+    	}
+		if (building._costsTaken) {
+			ResourcesManager.MineralsInReserve -= building._buildingType.mineralPrice();
+			if (building._buildingType == UnitType.Terran_Supply_Depot) {
+				ResourcesManager.PotentialSupply -= building._buildingType.supplyProvided();	
+			}	
+		}
+		BuildingsUnderConstruction.remove(building);
     }
     
 	public static BaseLocation GetClosestEmptyBase() {
