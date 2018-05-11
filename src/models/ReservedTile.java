@@ -14,7 +14,8 @@ public class ReservedTile {
 	private void Init(TilePosition tp, UnitType ut, int paddingAmount) {
 		tilePositionTopLeft = tp;
 		tilePositionTopLeftWithPadding = new TilePosition(tp.getX() - paddingAmount, tp.getY() - paddingAmount);
-		tilePositionBottomRight = new TilePosition(tp.getX() + ut.tileWidth() + paddingAmount, tp.getY() + ut.tileHeight() + paddingAmount);
+		tilePositionBottomRight = new TilePosition(tp.getX() + ut.tileWidth(), tp.getY() + ut.tileHeight());
+		tilePositionBottomRightWithPadding = new TilePosition(tp.getX() + ut.tileWidth() + paddingAmount, tp.getY() + ut.tileHeight() + paddingAmount);
 		isTemp = true;
 		buildingType = ut;
 		addSpaceForAddon(ut, tp);
@@ -22,22 +23,23 @@ public class ReservedTile {
 	public TilePosition tilePositionTopLeft;
 	public TilePosition tilePositionTopLeftWithPadding;
 	public TilePosition tilePositionBottomRight;
+	public TilePosition tilePositionBottomRightWithPadding;
 	public boolean isTemp;
 	public UnitType buildingType;
 	public ReservedTile addOn;
 	
 	public boolean isOverlappingTile(ReservedTile testPosition) {
-		if (testPosition.tilePositionBottomRight.getX() < tilePositionTopLeft.getX()) {
+		if (testPosition.tilePositionBottomRightWithPadding.getX() - BuildingsManager.paddingAroundBuildings < tilePositionTopLeftWithPadding.getX() + BuildingsManager.paddingAroundBuildings) {
 			return false;
 		}
-		else if (testPosition.tilePositionTopLeftWithPadding.getX() > tilePositionBottomRight.getX() 
-				&& (this.addOn != null && testPosition.tilePositionTopLeftWithPadding.getX() > this.addOn.tilePositionBottomRight.getX())) {
+		else if (testPosition.tilePositionTopLeftWithPadding.getX() - BuildingsManager.paddingAroundBuildings > tilePositionBottomRightWithPadding.getX() + BuildingsManager.paddingAroundBuildings 
+				&& (this.addOn != null && testPosition.tilePositionTopLeft.getX() > this.addOn.tilePositionBottomRight.getX())) {
 			return false;
 		}
-		else if (testPosition.tilePositionBottomRight.getY() < tilePositionTopLeft.getY()) {
+		else if (testPosition.tilePositionBottomRightWithPadding.getY() - BuildingsManager.paddingAroundBuildings < tilePositionTopLeftWithPadding.getY() + BuildingsManager.paddingAroundBuildings) {
 			return false;
 		}
-		else if (testPosition.tilePositionTopLeftWithPadding.getY() > tilePositionBottomRight.getY()) {
+		else if (testPosition.tilePositionTopLeftWithPadding.getY() - BuildingsManager.paddingAroundBuildings > tilePositionBottomRightWithPadding.getY() + BuildingsManager.paddingAroundBuildings) {
 			return false;
 		}
 		return true;
@@ -58,6 +60,9 @@ public class ReservedTile {
 	        return false;
 	    }
 	    if ((this.tilePositionBottomRight == null) ? (other.tilePositionBottomRight != null) : this.tilePositionBottomRight.getDistance(other.tilePositionBottomRight) != 0) {
+	        return false;
+	    }
+	    if ((this.tilePositionBottomRightWithPadding == null) ? (other.tilePositionBottomRightWithPadding != null) : this.tilePositionBottomRightWithPadding.getDistance(other.tilePositionBottomRightWithPadding) != 0) {
 	        return false;
 	    }
 	    return true;
