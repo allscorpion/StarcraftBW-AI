@@ -17,18 +17,21 @@ public class ReservedTile {
 		tilePositionBottomRight = new TilePosition(tp.getX() + ut.tileWidth() + paddingAmount, tp.getY() + ut.tileHeight() + paddingAmount);
 		isTemp = true;
 		buildingType = ut;
+		addSpaceForAddon(ut, tp);
 	}
 	public TilePosition tilePositionTopLeft;
 	public TilePosition tilePositionTopLeftWithPadding;
 	public TilePosition tilePositionBottomRight;
 	public boolean isTemp;
 	public UnitType buildingType;
+	public ReservedTile addOn;
 	
 	public boolean isOverlappingTile(ReservedTile testPosition) {
 		if (testPosition.tilePositionBottomRight.getX() < tilePositionTopLeft.getX()) {
 			return false;
 		}
-		else if (testPosition.tilePositionTopLeftWithPadding.getX() > tilePositionBottomRight.getX()) {
+		else if (testPosition.tilePositionTopLeftWithPadding.getX() > tilePositionBottomRight.getX() 
+				&& (this.addOn != null && testPosition.tilePositionTopLeftWithPadding.getX() > this.addOn.tilePositionBottomRight.getX())) {
 			return false;
 		}
 		else if (testPosition.tilePositionBottomRight.getY() < tilePositionTopLeft.getY()) {
@@ -59,4 +62,16 @@ public class ReservedTile {
 	    }
 	    return true;
 	}
+	
+	private boolean addSpaceForAddon(UnitType building, TilePosition position) {
+        boolean canThisBuildingHaveAddon = building.canBuildAddon();
+
+        if (canThisBuildingHaveAddon) {
+        	TilePosition pos = new TilePosition(position.getX() + 4, position.getY() + 1);
+        	this.addOn = new ReservedTile(pos, UnitType.Terran_Comsat_Station, 0);
+            return true;
+        }
+
+        return false;
+    }
 }
