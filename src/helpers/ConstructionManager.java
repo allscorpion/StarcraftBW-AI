@@ -24,29 +24,29 @@ public class ConstructionManager {
 		ConstructBuilding(UnitType.Terran_Supply_Depot);
 		if (!ResourcesManager.isDepoRequired()) {
 			switch (StarCraftInstance.currentPlayStyle) {
-			case Military:
-				BuildBarracksUnit();
-				ConstructBuilding(UnitType.Terran_Barracks);
-				BuildWorker();
-				BuildGas();
-				ConstructBuilding(UnitType.Terran_Academy);
-				break;
-			case Greedy:
-				BuildWorker();
-				BuildBase();
-				BuildGas();
-				ConstructBuilding(UnitType.Terran_Academy);
-				break;
-			case Balanced:
-				BuildWorker();
-				BuildBarracksUnit();
-				ConstructBuilding(UnitType.Terran_Barracks);
-				BuildGas();
-				ConstructBuilding(UnitType.Terran_Academy);
-				BuildBase();
-				break;
-			default:
-				break;
+				case Military:
+					BuildBarracksUnit();
+					ConstructBuilding(UnitType.Terran_Barracks);
+					BuildWorker();
+					BuildGas();
+					ConstructBuilding(UnitType.Terran_Academy);
+					break;
+				case Greedy:
+					BuildWorker();
+					BuildBase();
+					BuildGas();
+					ConstructBuilding(UnitType.Terran_Academy);
+					break;
+				case Balanced:
+					BuildWorker();
+					BuildBarracksUnit();
+					ConstructBuilding(UnitType.Terran_Barracks);
+					BuildGas();
+					ConstructBuilding(UnitType.Terran_Academy);
+					BuildBase();
+					break;
+				default:
+					break;
 			}
 				
 		}
@@ -117,19 +117,33 @@ public class ConstructionManager {
 	
 	private static void BuildBase() {
 		boolean allowBaseCreation = false;
-		if (BaseManager.GetTotalAmountOfCommandCenters() == 1) {
-			if (ResourcesManager.PotentialSupply / 2 > 10 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
-				allowBaseCreation = true;
-			}
-		}else if (BaseManager.GetTotalAmountOfCommandCenters() == 2) {
-			if (BuildingsManager.BarracksCount >= 5 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
-				allowBaseCreation = true;
-			}
-		} else if (BaseManager.GetTotalAmountOfCommandCenters() == 3) {
-			if (BuildingsManager.BarracksCount >= 7.5 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
-				allowBaseCreation = true;
-			}
+		switch (StarCraftInstance.currentPlayStyle) {
+			case Military:
+				break;
+			case Greedy:
+				if (ResourcesManager.PotentialSupply / 2 > 10 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+					allowBaseCreation = true;
+				}
+				break;
+			case Balanced:
+				if (BaseManager.GetTotalAmountOfCommandCenters() == 1) {
+					if (ResourcesManager.PotentialSupply / 2 > 10 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+						allowBaseCreation = true;
+					}
+				}else if (BaseManager.GetTotalAmountOfCommandCenters() == 2) {
+					if (BuildingsManager.BarracksCount >= 5 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+						allowBaseCreation = true;
+					}
+				} else if (BaseManager.GetTotalAmountOfCommandCenters() == 3) {
+					if (BuildingsManager.BarracksCount >= 7.5 && BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Command_Center) == 0) {
+						allowBaseCreation = true;
+					}
+				}
+				break;
+			default:
+				break;
 		}
+		
 		if (allowBaseCreation) {
 			BaseLocation bl = BuildingsManager.GetClosestEmptyBase();
 			Worker worker = WorkersManager.GetWorker(bl.getTilePosition());
