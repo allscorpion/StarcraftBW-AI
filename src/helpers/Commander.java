@@ -7,6 +7,7 @@ import enums.PlayStyles;
 
 public class Commander {
 	public static void Init() {
+		CameraHelper.init();
 		BuildingsManager.Init();
 		BaseManager.Init();
 		ConstructionManager.Init();

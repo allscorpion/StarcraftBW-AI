@@ -15,6 +15,7 @@ import bwta.Chokepoint;
 import helpers.StarCraftInstance;
 import helpers.BaseManager;
 import helpers.BuildingsManager;
+import helpers.CameraHelper;
 import helpers.Commander;
 import helpers.ConstructionManager;
 import helpers.DrawingHelper;
@@ -118,6 +119,7 @@ public class start extends DefaultBWListener {
     
     @Override
     public void onUnitCreate(Unit unit) {
+    	CameraHelper.moveCamera(unit.getPosition());
     	if (!isMyUnit(unit)) return;
     	Commander.allMyUnits.add(unit);
 		WorkersManager.onWorkerCreate(unit);
@@ -126,6 +128,7 @@ public class start extends DefaultBWListener {
 
     @Override
     public void onUnitDestroy(Unit unit) {
+    	CameraHelper.moveCamera(unit.getPosition());
     	if (unit.getType() == UnitType.Resource_Mineral_Field) {
     		WorkersManager.RemoveMineralFromWorkers(unit);
     		BaseManager.SetBaseStartedToMineOut(unit);
@@ -140,6 +143,7 @@ public class start extends DefaultBWListener {
     
     @Override
     public void onUnitComplete(Unit unit) {
+    	CameraHelper.moveCamera(unit.getPosition());
     	if (!isMyUnit(unit)) return;
     	BuildingsManager.buildingComplete(unit);
     	UnitsManager.onUnitComplete(unit);
