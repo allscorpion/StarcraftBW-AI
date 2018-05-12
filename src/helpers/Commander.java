@@ -1,12 +1,9 @@
-import helpers.BaseManager;
-import helpers.BuildingsManager;
-import helpers.ConstructionManager;
-import helpers.EnemyManager;
-import helpers.MiningHelper;
-import helpers.ResourcesManager;
-import helpers.ScoutsManager;
-import helpers.UnitsManager;
-import helpers.WorkersManager;
+package helpers;
+import java.util.ArrayList;
+import java.util.List;
+
+import bwapi.Unit;
+import enums.PlayStyles;
 
 public class Commander {
 	public static void Init() {
@@ -19,6 +16,10 @@ public class Commander {
 		WorkersManager.Init();
 		EnemyManager.Init();
 		ScoutsManager.Init();
+		currentPlayStyle = PlayStyles.Military;
+		allMyUnits = new ArrayList<Unit>();
 	}
+	public static List<Unit> allMyUnits;
 	
+	public static PlayStyles currentPlayStyle;
 }

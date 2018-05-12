@@ -15,6 +15,7 @@ import bwta.Chokepoint;
 import helpers.StarCraftInstance;
 import helpers.BaseManager;
 import helpers.BuildingsManager;
+import helpers.Commander;
 import helpers.ConstructionManager;
 import helpers.DrawingHelper;
 import helpers.EnemyManager;
@@ -118,7 +119,7 @@ public class start extends DefaultBWListener {
     @Override
     public void onUnitCreate(Unit unit) {
     	if (!isMyUnit(unit)) return;
-    	StarCraftInstance.allMyUnits.add(unit);
+    	Commander.allMyUnits.add(unit);
 		WorkersManager.onWorkerCreate(unit);
 		BuildingsManager.buildingCreated(unit);	
     }
@@ -129,8 +130,8 @@ public class start extends DefaultBWListener {
     		WorkersManager.RemoveMineralFromWorkers(unit);
     		BaseManager.SetBaseStartedToMineOut(unit);
     	}
-    	if (!StarCraftInstance.allMyUnits.contains(unit)) return;
-    	StarCraftInstance.allMyUnits.remove(unit);
+    	if (!Commander.allMyUnits.contains(unit)) return;
+    	Commander.allMyUnits.remove(unit);
     	BuildingsManager.buildingDestroyed(unit);
     	WorkersManager.onWorkerDestroy(unit);
     	UnitsManager.onUnitDestroy(unit);
@@ -164,7 +165,7 @@ public class start extends DefaultBWListener {
     	StarCraftInstance.game.drawTextScreen(560, 20, "Supply " + StarCraftInstance.self.supplyUsed() / 2 + "/" + ResourcesManager.PotentialSupply / 2);
     	StarCraftInstance.game.drawTextScreen(560, 40, "APM " + StarCraftInstance.game.getAPM());
         //DrawingHelper.drawTextOnScreen("Workers " + WorkersManager.Workers.size());
-    	DrawingHelper.drawTextOnScreen("Current playstyle: " + StarCraftInstance.currentPlayStyle);
+    	DrawingHelper.drawTextOnScreen("Current playstyle: " + Commander.currentPlayStyle);
     	DrawingHelper.drawTextOnScreen("Income Per Minute - Minerals: " + ResourcesManager.MineralsPerMinute);
     	DrawingHelper.drawTextOnScreen("Income Per Second - Minerals: " + ResourcesManager.MineralsPerMinute / 60);
     	DrawingHelper.drawTextOnScreen("Game time " + StarCraftInstance.game.elapsedTime() / 60 + ":" + (StarCraftInstance.game.elapsedTime() % 60 < 10 ? "0": "") + StarCraftInstance.game.elapsedTime() % 60);

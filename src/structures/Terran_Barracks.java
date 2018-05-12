@@ -4,6 +4,7 @@ import bwapi.UnitType;
 import enums.PlayStyles;
 import helpers.BaseManager;
 import helpers.BuildingsManager;
+import helpers.Commander;
 import helpers.ConstructionManager;
 import helpers.ResourcesManager;
 import helpers.StarCraftInstance;
@@ -21,7 +22,7 @@ public class Terran_Barracks implements IStructure {
 		if (BuildingsManager.amountOfBuildingTypeReserved(UnitType.Terran_Barracks) > 2) {
 			return false;
 		}
-		switch (StarCraftInstance.currentPlayStyle) {
+		switch (Commander.currentPlayStyle) {
 			case Military:
 				if (BuildingsManager.BarracksCount < 3) {
 					return true;

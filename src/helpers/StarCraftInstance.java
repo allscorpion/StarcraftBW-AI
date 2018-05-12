@@ -18,8 +18,6 @@ public class StarCraftInstance {
 		mirror = _mirror;
 		game = mirror.getGame();
         self = game.self();
-        allMyUnits = new ArrayList<Unit>();
-        currentPlayStyle = PlayStyles.Greedy;
 	}
 	
 	public static Mirror mirror;
@@ -27,9 +25,4 @@ public class StarCraftInstance {
 	public static Game game;
 
 	public static Player self;
-	
-	public static List<Unit> allMyUnits;
-	
-	public static PlayStyles currentPlayStyle;
-	
 }

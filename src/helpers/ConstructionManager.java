@@ -1,5 +1,6 @@
 package helpers;
 
+import java.rmi.activation.ActivationGroupDesc.CommandEnvironment;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,18 +13,16 @@ import models.Building;
 import models.CustomBaseLocation;
 import models.Worker;
 import structures.CacheStructure;
-
 public class ConstructionManager {
 	public static void Init() {
 		cachedStructures = new ArrayList<CacheStructure>();
 	}
-	
 	private static List<CacheStructure> cachedStructures;
 	
 	public static void StartConstructionQueue() {
 		ConstructBuilding(UnitType.Terran_Supply_Depot);
 		if (!ResourcesManager.isDepoRequired()) {
-			switch (StarCraftInstance.currentPlayStyle) {
+			switch (Commander.currentPlayStyle) {
 				case Military:
 					BuildBarracksUnit();
 					ConstructBuilding(UnitType.Terran_Barracks);
@@ -117,7 +116,7 @@ public class ConstructionManager {
 	
 	private static void BuildBase() {
 		boolean allowBaseCreation = false;
-		switch (StarCraftInstance.currentPlayStyle) {
+		switch (Commander.currentPlayStyle) {
 			case Military:
 				break;
 			case Greedy:
