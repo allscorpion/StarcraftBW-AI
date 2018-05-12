@@ -110,7 +110,10 @@ public class ConstructionManager {
 					// BaseManager.GetAmountOfWorkersAssignedToCommandCenter(cbl) >= BaseManager.GetCommandCenterMaxWorkers(cbl) / 2
 					cbl.commandCenter.hasGasStructure = true;
 					TilePosition gasPosition = cbl.baseLocation.getGeysers().get(0).getTilePosition();
-					BuildingsManager.BuildingsUnderConstruction.add(new Building(WorkersManager.GetWorker(gasPosition), UnitType.Terran_Refinery, gasPosition));
+					Worker w = WorkersManager.GetWorker(gasPosition);
+					if (w != null) {
+						BuildingsManager.BuildingsUnderConstruction.add(new Building(w, UnitType.Terran_Refinery, gasPosition));	
+					}
 				}
 			}
 		}
@@ -148,8 +151,10 @@ public class ConstructionManager {
 		if (allowBaseCreation) {
 			BaseLocation bl = BuildingsManager.GetClosestEmptyBase();
 			Worker worker = WorkersManager.GetWorker(bl.getTilePosition());
-			if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
-				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
+			if (worker != null) {
+				if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
+					BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
+				}	
 			}
 		}
 		if (Commander.currentPlayStyle == PlayStyles.Greedy && BaseManager.GetTotalAmountOfCommandCenters() >= 3) Commander.currentPlayStyle = PlayStyles.Balanced;
