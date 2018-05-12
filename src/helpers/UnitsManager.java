@@ -16,6 +16,7 @@ import bwapi.*;
 import bwta.BWTA;
 import bwta.BaseLocation;
 import bwta.Chokepoint;
+import enums.PlayStyles;
 import models.CustomBaseLocation;
 import models.MilitaryUnit;
 
@@ -195,6 +196,7 @@ public class UnitsManager{
     	}
 		DrawingHelper.drawTextOnScreen(UnitsManager.MilitaryUnits.size() + "");
 		if (UnitsManager.MilitaryUnits.size() >= 30) {
+			if (Commander.currentPlayStyle == PlayStyles.Military) Commander.currentPlayStyle = PlayStyles.Greedy;
 			if (EnemyManager.enemyBuildingMemory.size() > 0) {
 				for (MilitaryUnit mu : MilitaryUnits) {
 	    			if (mu.unit.isIdle()) {

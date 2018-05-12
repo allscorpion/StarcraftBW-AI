@@ -20,9 +20,28 @@ public class Terran_Academy implements IStructure {
 				BuildingsManager.Academy == null;
 	}
 
+	
+
+	@Override
+	public boolean Greedy_RequirementsMetToBuild() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean Military_RequirementsMetToBuild() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean Balanced_RequirementsMetToBuild() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 	@Override
 	public void OnSuccess(Worker worker) {
 		BuildingsManager.Academy = worker.unit;
 	}
-
 }

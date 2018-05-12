@@ -8,6 +8,7 @@ import bwapi.TilePosition;
 import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BaseLocation;
+import enums.PlayStyles;
 import interfaces.IStructure;
 import models.Building;
 import models.CustomBaseLocation;
@@ -80,6 +81,7 @@ public class ConstructionManager {
 	}
 	
 	private static void BuildWorker() {
+		if (WorkersManager.Workers.size() >= 70) return;
 		for (CustomBaseLocation cbl : BaseManager.baseLocations) {
     		if (cbl.commandCenter != null) {
     			if (BuildingsManager.Academy != null && cbl.commandCenter.unit.getAddon() == null && StarCraftInstance.game.canMake(UnitType.Terran_Comsat_Station)) {
@@ -148,9 +150,9 @@ public class ConstructionManager {
 			Worker worker = WorkersManager.GetWorker(bl.getTilePosition());
 			if (bl != null && !BuildingsManager.isTileReserved(bl.getTilePosition(), UnitType.Terran_Command_Center)) {
 				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, UnitType.Terran_Command_Center, bl.getTilePosition()));
-				worker.miningFrom = null;
 			}
 		}
+		if (Commander.currentPlayStyle == PlayStyles.Greedy && BaseManager.GetTotalAmountOfCommandCenters() >= 3) Commander.currentPlayStyle = PlayStyles.Balanced;
 	}
 	
 	private static void BuildBarracksUnit() {
@@ -172,6 +174,19 @@ public class ConstructionManager {
 	
 	private static void CheckStructure(IStructure structure, UnitType buildingType) {	
 		if (structure.RequirementsMetToBuild()) {
+			switch (Commander.currentPlayStyle) {
+				case Military:
+					if (!structure.Military_RequirementsMetToBuild()) return;
+					break;
+				case Greedy:
+					if (!structure.Greedy_RequirementsMetToBuild()) return;
+					break;
+				case Balanced:
+					if (!structure.Balanced_RequirementsMetToBuild()) return;
+					break;
+				default:
+					break;
+			}
 			Worker worker = WorkersManager.GetWorker();	
 			if (worker != null) {
 				BuildingsManager.BuildingsUnderConstruction.add(new Building(worker, buildingType));	
