@@ -142,11 +142,54 @@ public class UnitsManager{
     	return selectedEnemyUnit; 
     }
     
+    private static void moveAwayFrom(Unit myUnit, Position position, double moveDistance) {
+        int dx = position.getX() - myUnit.getX();
+        int dy = position.getY() - myUnit.getY();
+        double vectorLength = Math.sqrt(dx * dx + dy * dy);
+        double modifier = (moveDistance * 32) / vectorLength;
+        dx = (int) (dx * modifier);
+        dy = (int) (dy * modifier);
+
+        Position newPosition = new Position(myUnit.getX() - dx, myUnit.getY() - dy).makeValid();
+
+        if (myUnit.isIdle() || myUnit.getOrder() == null || myUnit.getOrderTargetPosition().getDistance(newPosition) > 0) {
+        	myUnit.move(newPosition);	
+        }
+    }
+    
+    private static boolean handleMoveAwayIfCloserThan(Unit unit, Position avoidCenter, double minDist) {
+        if (unit.getDistance(avoidCenter) < 3.2) {
+            moveAwayFrom(unit, avoidCenter, 2);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    
+    private static boolean AvoidStorm(Unit myUnit) {
+		if (myUnit.isUnderStorm()) {
+			for (Bullet bullet : StarCraftInstance.game.getBullets()) {
+				if (bullet.getType().equals(BulletType.Psionic_Storm)) {
+					handleMoveAwayIfCloserThan(myUnit, bullet.getPosition(), 3.2);
+					break;
+				}
+			}
+			return true;
+		}
+		return false;
+    }
+    
     public static void attackUnits() {
+    	
     	List<Unit> closestEnemyUnits = StarCraftInstance.game.enemy().getUnits();
     	if (closestEnemyUnits.size() > 0) {
     		for (final MilitaryUnit mu : MilitaryUnits) {
     			if (mu.LastOrderFrame + 2 > StarCraftInstance.game.getFrameCount()) {
+    				continue;
+    			}
+    			if (AvoidStorm(mu.unit)) {
+    				// unit is currently avoiding storm
     				continue;
     			}
     			//if (myUnit.isIdle()) {
@@ -175,6 +218,7 @@ public class UnitsManager{
 //    					)
 //    				);
     				if (mu.unit.isIdle() || (mu.unit.getOrderTarget() == null || (mu.unit.getOrderTarget().getID() != closestEnemy.getID()))) {
+    					CameraHelper.moveCamera(closestEnemy.getPosition());
     					mu.AttackUnit(closestEnemy);	
 //    					if (closestEnemy.getType() == UnitType.Protoss_Zealot) {
 //        					mu.LastOrderFrame = StarCraftInstance.game.getFrameCount();
@@ -194,8 +238,8 @@ public class UnitsManager{
     			//}
     		} 
     	}
-		DrawingHelper.drawTextOnScreen(UnitsManager.MilitaryUnits.size() + "");
-		if (UnitsManager.MilitaryUnits.size() >= 30) {
+    	//if (StarCraftInstance.game.elapsedTime() / 60 > 25) {
+		if (UnitsManager.MilitaryUnits.size() >= 50) {
 			if (Commander.currentPlayStyle == PlayStyles.Military) Commander.currentPlayStyle = PlayStyles.Greedy;
 			if (EnemyManager.enemyBuildingMemory.size() > 0) {
 				for (MilitaryUnit mu : MilitaryUnits) {
