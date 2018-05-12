@@ -138,15 +138,15 @@ public class BuildingsManager {
     			BaseManager.TransferWorkersToRefinery();
         	}
     		else if (unit.getType() == UnitType.Terran_Barracks) {
-    			List<Chokepoint> chokepoints = null;
-    			CustomBaseLocation nearestBase = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
-    			if(nearestBase == null) {
-    				chokepoints = BaseManager.mySpawn.getRegion().getChokepoints();
-    			} else {
-    				chokepoints = nearestBase.baseLocation.getRegion().getChokepoints();
-    			}
-    			Position mainChoke = PathingManager.GetClosestChokepoint(null, unit.getPosition(), chokepoints).getCenter();
-    			unit.setRallyPoint(mainChoke);
+//    			List<Chokepoint> chokepoints = null;
+//    			CustomBaseLocation nearestBase = BaseManager.GetCustomBaseLocationFromPosition(unit.getPosition());
+//    			if(nearestBase == null) {
+//    				chokepoints = BaseManager.mySpawn.getRegion().getChokepoints();
+//    			} else {
+//    				chokepoints = nearestBase.baseLocation.getRegion().getChokepoints();
+//    			}
+//    			Position mainChoke = PathingManager.GetClosestChokepoint(null, unit.getPosition(), chokepoints).getCenter();
+//    			unit.setRallyPoint(mainChoke);
     		}
     		if (!unit.getType().isAddon()) {
 	    		if (BuildingsUnderConstruction.size() > 0) {
